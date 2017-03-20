@@ -1,0 +1,96 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<title>Vidyo Log Viewer</title> 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" rel="stylesheet" type="text/css" >
+<link href="VidyoLog.css" rel="stylesheet" type="text/css" >
+<script src="VidyoLog.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+function VidyoLogViewer() {
+	var logServers = []; /* store servers */
+	var serverId = 1;
+	var searchString = "";
+	var vidyoLog;
+	
+	this.Init = function(containerDivId) {
+		
+		function InitialLayout(containerDivId) {
+			var html =  "<div id='header'/>";
+			html +=     "<div id='right'></div>";
+			$("#" + containerDivId).html(html);
+			
+			html = 
+			"<textarea class='inputLog' id='inputLog' value='' placeholder='[Add Server]' />" +
+			"<span class='logServers' id='logServers' />" +
+			"<textarea class='fileLog' id='fileLog' value='' placeholder='[Paste the log]' />" +
+			"<textarea class='searchLog' id='searchLog'   value='' placeholder='[Local Filter]' />";
+			
+			$("#header").append(html);
+			
+			vidyoLog = new VidyoLog("right");
+			
+			$("#fileLog").bind('input propertychange', function() {
+				vidyoLog.ProcessLogFile($(this).val());
+				$(this).val("");
+			});
+			$("#inputLog").keyup(function(e){
+				var code = (e.keyCode ? e.keyCode : e.which);
+				if(code == 13) { //Enter keycode
+					var value = $(this).val();
+					var valueTrim = value.slice(0,-1);
+					$(this).val("");
+					AddServer(valueTrim, valueTrim);
+				}
+			});
+			$("#filterLog").keyup(function(e){
+				var code = (e.keyCode ? e.keyCode : e.which);
+				if(code == 13) { //Enter keycode
+					var value = $(this).val();
+					var valueTrim = value.slice(0,-1);
+					$(this).val(valueTrim);
+					vidyoLog.SetServerSideFilter(valueTrim);
+				}
+			});
+			$("#searchLog").keyup(function(e){
+				var code = (e.keyCode ? e.keyCode : e.which);
+				if(code == 13) { //Enter keycode
+					var value = $(this).val();
+					var valueTrim = value.slice(0,-1);
+					$(this).val(valueTrim);
+					vidyoLog.Search(valueTrim);
+				}
+			});
+		}
+		
+		function AddServer(serverName, serverHOST) {
+			var html = "<span id='serverIDRemove-" + serverId + "' class='logServerValues " + "colorID-" + serverId%10 + "'>" + serverName + "</span>";
+			$("#logServers").append(html);
+			$("#serverIDRemove-" + serverId).data("serverHOST", serverHOST);
+			$("#serverIDRemove-" + serverId).click(function() {
+				var serverHOST = $(this).data("serverHOST");
+				$(this).remove();
+				vidyoLog.RemoveServer(serverHOST);
+			});
+			vidyoLog.AddServer(serverName, serverHOST);
+			serverId++;
+		}
+		InitialLayout(containerDivId);
+		AddServer("localhost:7776", "localhost:7776");
+		
+	}
+};
+
+$(document).ready(function()
+{
+	vidyoLogViewer = new VidyoLogViewer();
+	vidyoLogViewer.Init("rootElement");
+});
+</script>
+</head> 
+<body id="rootElement" style="width:100%;height:100%">
+</body>
+</html>

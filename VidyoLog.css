@@ -1,0 +1,296 @@
+* {
+	margin:       0;
+	padding:      0;
+}
+html, body {
+	width:        100%;
+	height:       100%;
+	font-family:  Helvetica,Arial,sans-serif;
+}
+ul {
+    list-style-type: none;
+}
+.right {
+	float:        right;
+}
+.left {
+	float:        left;
+}
+.inputLog {
+	position:     absolute;
+	top:          0px;
+	left:         0px;
+	height:       25px;
+	font-size:    20px;
+	margin:       5px;
+	padding:      5px;
+	width: 		  200px;
+}
+.fileLog {
+	position:     absolute;
+	top:          0px;
+	right:        165px;
+	height:       25px;
+	font-size:    20px;
+	margin:       5px;
+	padding:      5px;
+	width: 		  150px;
+}
+.searchLog {
+	position:     absolute;
+	top:          0px;
+	right:        0px;
+	height:       25px;
+	font-size:    20px;
+	margin:       5px;
+	padding:      5px;
+	width: 		  150px;
+}
+.logServers {
+	position:     absolute;
+	top:          0px;
+	right:        320px;
+	left:         220px;
+	height:       36px;
+	margin:       5px;
+	overflow-y:   scroll;
+}
+.logServerValues {
+	padding-left: 5px;
+	cursor:       pointer;
+	float:	      left;
+	padding:      3px;
+	margin:       3px;
+}
+#header {
+	position:     absolute;
+	top:          0;
+	height:       50px;
+	left:         0px;
+	right:        0px;
+	background:   #F6F4F0;
+	border-bottom: solid 5px #444;
+	overflow:     hidden;
+}
+#right {
+	position:     absolute;
+	top:          55px;
+	left:         0px;
+	right:        0px;
+	bottom:       0px;
+	overflow:     hidden;
+}
+#logBody {
+	width:        100%;
+	overflow:     scroll;
+}
+#logo {
+	width:        40px;
+	height:       40px;
+	float:        left;
+	padding:      5px;
+}
+#logStats {
+	position:     absolute;
+	top:          0px;
+	height:       160px;
+	left:         0px;
+	right:        0px;
+	overflow:     hidden;
+}
+#logTable {
+	position:     absolute;
+	top:          160px;
+	bottom:       0px;
+	left:         0px;
+	right:        0px;
+	overflow:     scroll;
+}
+table.logTable {
+	border-spacing: 1px;
+}
+table.logTable td {
+    white-space: pre-wrap;
+    padding: 2px;
+	font-family: monospace;
+}
+table.logTable tr {
+	border-right: 1px solid white;
+}
+td.logIndex, td.logTime, td.logLevel, td.logCategory, td.logThreadId, td.logFunctionLine, td.logFunctionName {
+	min-width: 30px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+td.logFunctionName {
+	max-width: 400px;
+	white-space: nowrap;
+}
+td.logGoTo a {
+	font-family: Helvetica,Arial,sans-serif;
+	text-decoration: none;
+}
+td.logBody {
+}
+.xmlBodyObj {
+	color: rgb(28, 20, 155);
+	font-weight:  bold;
+}
+.xmlValueto, .xmlValuedsturi {
+	color:  green;
+}
+.xmlValuefrom, .xmlValuesrcuri {
+	color:  blue;
+}
+.WARNING, .WARN, .LMI_LOGLEVEL_WARNING, .VIDYO_LOGLEVEL_WARNING {
+	color: white;
+	background: blue;
+}
+.ERROR, .LMI_LOGLEVEL_ERROR, .VIDYO_LOGLEVEL_ERROR {
+	color: white;
+	background: red;
+}
+.DEBUG, .LMI_LOGLEVEL_DEBUG, .VIDYO_LOGLEVEL_DEBUG {
+	background: whitesmoke;
+}
+.INFO, .LMI_LOGLEVEL_INFO, .VIDYO_LOGLEVEL_INFO {
+	background: lightyellow;
+}
+.SENT, .LMI_LOGLEVEL_SENT, .VIDYO_LOGLEVEL_SENT {
+	background: #CFFFCF;
+}
+.RECEIVED, .LMI_LOGLEVEL_RECEIVED, .VIDYO_LOGLEVEL_RECEIVED {
+	background: #D4E4FF;
+}
+.colorID-0 {
+	background-color: white;
+	color:            white;
+}
+.colorID-1 {
+	background-color: #00CC00; /* green */
+	color:            white;
+}
+.colorID-2 {
+	background-color: #0066FF; /* blue */
+	color:            white;
+}
+.colorID-3 {
+	background-color: #CC0000; /* red */
+	color:            white;
+}
+.colorID-4 {
+	background-color: #FFFF00; /* yellow */
+	color:            black;
+}
+.colorID-5 {
+	background-color: #00FFCC; /* green-blue */
+	color:            white;
+}
+.colorID-6 {
+	background-color: #CC33FF; /* blue-red */
+	color:            white;
+}
+.colorID-7 {
+	background-color: #FF9966; /* red-yellow */
+	color:            white;
+}
+.colorID-8 {
+	background-color: #CCFF33; /* yellow-green */
+	color:            white;
+}
+.colorID-9 {
+	background-color: #0099CC; /* dark-blue */
+	color:            white;
+}
+.colorID-10 {
+	background-color: #993399; /* purple */
+	color:            white;
+}
+.statsData {
+	padding: 10px;
+	font-family: Helvetica, Arial, sans-serif;
+	background: white;
+}
+.statsData h1 {
+	font-size: 20px;
+}
+.statsData h2 {
+	font-size: 12px;
+}
+.json {
+	clear:both;
+}
+.floatTables {
+	float:left;
+	margin: 10px;
+}
+.TX {
+	clear: both;
+    float:left;
+    width:49%;
+    overflow: scroll;
+}
+.RX {
+    float:right;
+    width:49%;
+    overflow: scroll;
+}
+.EndStats {
+	clear: both;
+}
+
+table.stats a:link {
+  color: #666;
+  font-weight: bold;
+  text-decoration: none; 
+}
+table.stats a:visited {
+  color: #999999;
+  font-weight: bold;
+  text-decoration:none;
+}
+table.stats a:active,
+table.stats a:hover {
+	color: #bd5a35;
+	text-decoration:underline;
+}
+
+table.stats {
+	font-family:Arial, Helvetica, sans-serif;
+	color:#333;
+	font-size:12px;
+	background:#eaebec;
+	margin:10px 0px;
+}
+
+table.stats th {
+	padding:4px;
+	background: #ededed;
+}
+table.stats th:first-child {
+	text-align: left;
+	padding-left:10px;
+}
+table.stats tr {
+	text-align: center;
+	padding-left:10px;
+}
+table.stats td:first-child {
+	text-align: left;
+	padding-left:10px;
+	border-left: 0;
+}
+table.stats td {
+	padding:4px;
+	background: #fafafa;
+	font-family:Arial, Helvetica, sans-serif;
+}
+table.stats tr.even td {
+	background: #f6f6f6;
+}
+table.stats tr:last-child td {
+	border-bottom:0;
+}
+table.stats tr:hover td {
+	background: #f2f2f2;
+}
