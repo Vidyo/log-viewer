@@ -598,7 +598,7 @@ function VidyoStats(containerId) {
 	};
   
 	this.ProcessLogLine = function(logLine){
-		if (logLine.functionName == "VidyoRoomStatisticsAsyncRun") {
+		if (logLine.functionName == "VidyoRoomStatisticsAsyncRun" || logLine.functionName == "VidyoEndpointEnableDebug") {
 			/* Client Log */
 			var stats = $.parseJSON(logLine.body);
 			stats.logLineId = logLine.id;
