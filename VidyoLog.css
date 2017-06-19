@@ -46,6 +46,18 @@ ul {
 	padding:      5px;
 	width: 		  150px;
 }
+
+#processing {
+	position:     absolute;
+	top:          0px;
+	right:        565px;
+	height:       25px;
+	font-size:    20px;
+	margin:       3px;
+	padding:      5px;
+	width: 		  150px;
+}    
+
 .logServers {
 	position:     absolute;
 	top:          0px;
