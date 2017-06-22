@@ -158,67 +158,52 @@ function VidyoLog(containerId) {
 		logLine.index = id;
 		return logLine;
 	}
- this.ProcessLogFile = function (logFile) 
- {
-	var lineNumber = 1;
-        logFileSplit = logFile.split('\n');
-        var i=0;
-        var lineProcess=function () 
-	{
-          var logLineUnparsed = logFileSplit[i];
-          var logLine = null;
+	this.ProcessLogFile = function (logFile) {
+		var lineNumber = 1;
+        	logFileSplit = logFile.split('\n');
+        	var i=0;
+        	var lineProcess=function () {
+          		var logLineUnparsed = logFileSplit[i];
+          		var logLine = null;
 
-            if (!logLineUnparsed || logLineUnparsed.length == 0) 
-	    {
-                return;
-            } 
-	    else 
-	    {
-                /* if the next line does not begin with a number, concatenate both lines! */
-                var logLineFullUnparsed = logFileSplit[i];
-                while (logFileSplit[i + 1] && (logFileSplit[i + 1][0] < '0' || logFileSplit[i + 1][0] > '9')) 
-		{
-                    logLineFullUnparsed = logLineFullUnparsed.concat(logFileSplit[i + 1]);
-                    i = i + 1;
-                }
-                if (logLineUnparsed[2] == '-') 
-		{
-                    logLine = ParseDesktopLog(logLineFullUnparsed, lineNumber);
-                }
-		else 
-		{
-                    logLine = ParseSDKLog(logLineFullUnparsed, lineNumber);
-                }
-            }
-            if (!logLine) 
-	    {
-                logLine = ParseErrorLog(i);
-            }
-            logLine.levelEncoded = EncodeStringForAttr(logLine.level);
-            logLine.categoryEncoded = EncodeStringForAttr(logLine.category);
-            logLine.functionLineShortEncoded = EncodeStringForAttr(logLine.functionLineShort);
-            logLine.functionNameEncoded = EncodeStringForAttr(logLine.functionName);
-            lineNumber++;
+			if (!logLineUnparsed || logLineUnparsed.length == 0) {
+                	return;
+			} else {
+                		/* if the next line does not begin with a number, concatenate both lines! */
+                		var logLineFullUnparsed = logFileSplit[i];
+                		while (logFileSplit[i + 1] && (logFileSplit[i + 1][0] < '0' || logFileSplit[i + 1][0] > '9')) {
+                  			logLineFullUnparsed = logLineFullUnparsed.concat(logFileSplit[i + 1]);
+                    			i = i + 1;
+                		}
+                		if (logLineUnparsed[2] == '-') {
+                    			logLine = ParseDesktopLog(logLineFullUnparsed, lineNumber);
+                		} else {
+                    			logLine = ParseSDKLog(logLineFullUnparsed, lineNumber);
+                		}
+            		}
+             		if (!logLine) {
+                		logLine = ParseErrorLog(i);
+            		}
+            		logLine.levelEncoded = EncodeStringForAttr(logLine.level);
+            		logLine.categoryEncoded = EncodeStringForAttr(logLine.category);
+            		logLine.functionLineShortEncoded = EncodeStringForAttr(logLine.functionLineShort);
+            		logLine.functionNameEncoded = EncodeStringForAttr(logLine.functionName);
+            		lineNumber++;
 
-            /* order lines */
-            OrderAndRender(logLine);
-
-
-
-            $("#processing").html("loading: "+Math.round(i/logFileSplit.length*10000)/100+" %");
-            i++;
-            if(i==logFileSplit.length-1)
-	    {
-                clearInterval(x);
-                $("#processing").html("Complete!!!");
-           } 
-        };    
-        var x=setInterval(lineProcess,1);
-
-
-       /* for (var i = 0; i < logFileSplit.length; i++) {
-        }*/
-    };
+            		/* order lines */
+            		OrderAndRender(logLine);
+			
+            		$("#processing").html("loading: "+Math.round(i/logFileSplit.length*10000)/100+" %");
+            		i++;
+            		if(i==logFileSplit.length-1) {
+                	clearInterval(x);
+                	$("#processing").html("Complete!!!");
+           		} 
+        	};    
+        	var x=setInterval(lineProcess,1);
+		/* for (var i = 0; i < logFileSplit.length; i++) {
+        	}*/
+	}
 	
 	this.ScrollToLogRecord = function(logRecord, server) {
 		var recordId = "serverID-" + server.id + "-" + logRecord.index;
