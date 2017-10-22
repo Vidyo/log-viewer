@@ -88,13 +88,23 @@ function VidyoLog(containerId) {
 		if (!logLineTags || logLineTags.length != 5)
 			return null;
 		
-		var indexOfBodyBegin = logLineUnparsed.indexOf(logLineTags[4]);
-		/* the end of body is hard to find. the best delimiter seems to be " [ " */
-		var indexOfBodyEnd = logLineUnparsed.indexOf(" [ ");
+		/* For some strange reason, the "MetaData" is sometimes in the wrong location. Especially for LmiSignaling */
+		if (logLineTags[4] == "[") {
+			/* metadata before body separate the rest of meta data after body and remove last "]"*/
+			var restOfMetaData = logLineUnparsed.slice(logLineUnparsed.indexOf(" [ ") + 3, logLineUnparsed.indexOf(" ] "));
+			/* The body is after metadata */
+			var indexOfBodyBegin = logLineUnparsed.indexOf(" ] ") + 3;
+			/* the end of body is hard to find. the best delimiter seems to be " [ " */
+			var indexOfBodyEnd = logLineUnparsed.length -1;			
+		} else {
+			/* Body before metadata */
+			var indexOfBodyBegin = logLineUnparsed.indexOf(logLineTags[4]);
+			/* the end of body is hard to find. the best delimiter seems to be " [ " */
+			var indexOfBodyEnd = logLineUnparsed.indexOf(" [ ");
+			/* separate the rest of meta data after body and remove last "]"*/
+			var restOfMetaData = logLineUnparsed.slice(indexOfBodyEnd + 3, logLineUnparsed.length -1 );
+		}
 		var logLine = new Object();
-		
-		/* separate the rest of meta data after body and remove last "]"*/
-		var restOfMetaData = logLineUnparsed.slice(indexOfBodyEnd + 3, logLineUnparsed.length -1 );
 		var logLineRestTags = restOfMetaData.split(", ", 3);
 		
 		/* log does not contain year, assume current */
