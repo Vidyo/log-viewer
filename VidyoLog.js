@@ -155,6 +155,32 @@ function VidyoLog(containerId) {
 		}
 		return logLine;
 	}
+	function ParseSplunkLog(logLineUnparsed, id) {
+		var logLine = new Object();
+		
+		var logJson = JSON.parse(logLineUnparsed);
+		var date = logJson.result.logTimeStamp
+		date = date.substring(0, date.lastIndexOf('.'));
+		date = date.replace(/ /g, 'T') + "Z";
+		
+		logLine.id = "logLine" + id;
+		logLine.time =  new Date(date);
+		
+		/* check for valid header */
+		if(logLine.time.getFullYear()) {			
+			logLine.level = "INFO";
+			logLine.category = "Splunk";
+			logLine.threadName = "";
+			logLine.functionLine = "";
+			logLine.functionLineShort = "";
+			logLine.functionName = "SplunkLog";
+			logLine.body = logJson.result.JSON;	
+			logLine.index = id;
+		} else {		
+			return null;
+		}
+		return logLine;
+	}
 	function ParseErrorLog(id) {
 		var logLine = new Object();
 		logLine.time = new Date();
@@ -170,47 +196,49 @@ function VidyoLog(containerId) {
 	}
 	this.ProcessLogFile = function (logFile) {
 		var lineNumber = 1;
-        	logFileSplit = logFile.split('\n');
-        	var i=0;
-        	var lineProcess=function () {
-          		var logLineUnparsed = logFileSplit[i];
-          		var logLine = null;
+        logFileSplit = logFile.split('\n');
+        var i=0;
+        var lineProcess=function () {
+          	var logLineUnparsed = logFileSplit[i];
+          	var logLine = null;
 
 			if (!logLineUnparsed || logLineUnparsed.length == 0) {
                 	return;
 			} else {
-                		/* if the next line does not begin with a number, concatenate both lines! */
-                		var logLineFullUnparsed = logFileSplit[i];
-                		while (logFileSplit[i + 1] && (logFileSplit[i + 1][0] < '0' || logFileSplit[i + 1][0] > '9')) {
-                  			logLineFullUnparsed = logLineFullUnparsed.concat(logFileSplit[i + 1]);
-                    			i = i + 1;
-                		}
-                		if (logLineUnparsed[2] == '-') {
-                    			logLine = ParseDesktopLog(logLineFullUnparsed, lineNumber);
-                		} else {
-                    			logLine = ParseSDKLog(logLineFullUnparsed, lineNumber);
-                		}
-            		}
-             		if (!logLine) {
-                		logLine = ParseErrorLog(i);
-            		}
-            		logLine.levelEncoded = EncodeStringForAttr(logLine.level);
-            		logLine.categoryEncoded = EncodeStringForAttr(logLine.category);
-            		logLine.functionLineShortEncoded = EncodeStringForAttr(logLine.functionLineShort);
-            		logLine.functionNameEncoded = EncodeStringForAttr(logLine.functionName);
-            		lineNumber++;
+					var logLineFullUnparsed = logFileSplit[i];
+					if (logLineUnparsed[2] == '-') {
+						logLine = ParseDesktopLog(logLineFullUnparsed, lineNumber);
+					} else if (logLineUnparsed[0] == '{') {
+						logLine = ParseSplunkLog(logLineFullUnparsed, lineNumber);
+					} else {
+						/* if the next line does not begin with a number, concatenate both lines! */
+						while (logFileSplit[i + 1] && (logFileSplit[i + 1][0] < '0' || logFileSplit[i + 1][0] > '9')) {
+							logLineFullUnparsed = logLineFullUnparsed.concat(logFileSplit[i + 1]);
+								i = i + 1;
+						}
+						logLine = ParseSDKLog(logLineFullUnparsed, lineNumber);
+					}
+				}
+				if (!logLine) {
+					logLine = ParseErrorLog(i);
+				}
+				logLine.levelEncoded = EncodeStringForAttr(logLine.level);
+				logLine.categoryEncoded = EncodeStringForAttr(logLine.category);
+				logLine.functionLineShortEncoded = EncodeStringForAttr(logLine.functionLineShort);
+				logLine.functionNameEncoded = EncodeStringForAttr(logLine.functionName);
+				lineNumber++;
 
-            		/* order lines */
-            		OrderAndRender(logLine);
-			
-            		$("#processing").html("loading: "+Math.round(i/logFileSplit.length*10000)/100+" %");
-            		i++;
-            		if(i==logFileSplit.length-1) {
+				/* order lines */
+				OrderAndRender(logLine);
+		
+				$("#processing").html("loading: "+Math.round(i/logFileSplit.length*10000)/100+" %");
+				i++;
+				if(i==logFileSplit.length-1) {
                 	clearInterval(x);
                 	$("#processing").html("Complete!!!");
            		} 
         	};    
-        	var x=setInterval(lineProcess,1);
+        var x=setInterval(lineProcess,1);
 		/* for (var i = 0; i < logFileSplit.length; i++) {
         	}*/
 	}
@@ -629,6 +657,11 @@ function VidyoStats(containerId) {
 			/* Server Log */
 			var stats = $.parseJSON(logLine.body);
 			stats.stats.logLineId = logLine.id;
+			return this.ProcessStatsObject(stats.stats);
+		} else if (logLine.functionName == "SplunkLog") {
+			/* Splunk Log */
+			var stats = $.parseJSON(logLine.body);
+			stats.logLineId = logLine.id;
 			return this.ProcessStatsObject(stats.stats);
 		}
 		return null;
