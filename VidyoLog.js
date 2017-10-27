@@ -1040,6 +1040,7 @@ function VidyoStats(containerId) {
 		var sourcesTable = '';
 		var rateShaperTable = '';
 		var transportTable = '';
+		var logTable = '';
 				
 		var rxVideoTable = '';		
 		rxVideoTable += '<table class="stats">';
@@ -1324,6 +1325,30 @@ function VidyoStats(containerId) {
 				}
 				transportTable += '</table>';
 				
+				logTable += '<table class="stats">';
+				logTable +=		'<tr>';
+				logTable +=			'<th title="Type">Type</th>';
+				logTable +=			'<th title="Function:line">Function</th>';
+				logTable +=			'<th title="Num">Num</th>';
+				logTable +=		'</tr>';
+				for (var i in stats.logStats.logErrorDataStats) {
+					var logStat = stats.logStats.logErrorDataStats[i];
+					logTable +=		'<tr>';
+					logTable +=			'<td title="Type">Error</td>';
+					logTable +=			'<td title="Function:line">' + logStat.name + '</td>';
+					logTable +=			'<td title="Num">' + logStat.occurances + '</td>';
+					logTable +=		'</tr>';
+				}
+				for (var i in stats.logStats.logWarningDataStats) {
+					var logStat = stats.logStats.logWarningDataStats[i];
+					logTable +=		'<tr>';
+					logTable +=			'<td title="Type">Warning</td>';
+					logTable +=			'<td title="Function:line">' + logStat.name + '</td>';
+					logTable +=			'<td title="Num">' + logStat.occurances + '</td>';
+					logTable +=		'</tr>';
+				}
+				logTable += '</table>';
+				
 				sourcesTable += '<table class="stats">';
 				sourcesTable +=		'<tr>';
 				sourcesTable +=			'<td>Max Dynamic</td>';
@@ -1344,6 +1369,7 @@ function VidyoStats(containerId) {
 		rxBandwidthTable = $(rxBandwidthTable);
 		rateShaperTable = $(rateShaperTable);
 		transportTable = $(transportTable);
+		logTable = $(logTable);
 		pixelRateTable = $(pixelRateTable);
 		vitalsTable = $(vitalsTable);
 		overviewTable = $(overviewTable);
@@ -1373,6 +1399,10 @@ function VidyoStats(containerId) {
 		transportRow.append("<h1>Transport</h1>")
 			.append(transportTable);
 			
+		var logRow = $('<div/>', { id: "Log", class: "floatTables" });
+		logRow.append("<h1>Log</h1>")
+			.append(logTable);
+			
 		var txRow = $('<div/>', { id: "TX", class: "TX" });
 		txRow.append("<h1>Local</h1>")
 			.append("<h2>TX</h2>")
@@ -1401,7 +1431,7 @@ function VidyoStats(containerId) {
 		var jsonRow = $('<div/>', { id: "JsonView" + stats.logLineId, class: "JsonView" });
 
 		/* disable RateShaperRow and PixelRateRow, if adding later add .append(pixelRateRow).append(rateShaperRow) after sourcesRow */
-		output.append(vitalsRow).append(overviewRow).append(transportRow).append(sourcesRow).append(txRow).append(rxRow).append("<div class='EndStats'></div>").append(jsonRow);
+		output.append(vitalsRow).append(overviewRow).append(transportRow).append(sourcesRow).append(logRow).append(txRow).append(rxRow).append("<div class='EndStats'></div>").append(jsonRow);
 		
 		$("JsonView" + stats.logLineId).JSONView(stats, { collapsed: false });
 		
