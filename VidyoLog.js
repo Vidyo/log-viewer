@@ -661,7 +661,7 @@ function VidyoStats(containerId) {
 		} else if (logLine.functionName == "SplunkLog") {
 			/* Splunk Log */
 			var stats = $.parseJSON(logLine.body);
-			stats.logLineId = logLine.id;
+			stats.stats.logLineId = logLine.id;
 			return this.ProcessStatsObject(stats.stats);
 		}
 		return null;
