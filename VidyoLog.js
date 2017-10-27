@@ -679,7 +679,7 @@ function VidyoStats(containerId) {
 		
 		var dateInSecs = vitals.timeStamp.split(/[.]+/)[0];
 		rawStats[dateInSecs] = stats;
-		return RenderOverview(stats);
+		return RenderOverview(stats, vitals);
 	}
 	
 	function ParseStats(stats, vitals, sendStreams, receiveStreams, audioDebug)  {
@@ -784,8 +784,17 @@ function VidyoStats(containerId) {
 			var userStat = stats.userStats[iu];
 			for (var ir in userStat.roomStats) {
 				var roomStat = userStat.roomStats[ir];
+				/* split resource Id */
+				var resourceId = roomStat.id.substring(0, roomStat.id.lastIndexOf("_"));
+				/* split applicaiton Id */
+				var applicationId = roomStat.id.substring(roomStat.id.lastIndexOf("_") + 1, roomStat.id.lastIndexOf("@"));
 				/* assign fitals from any room */
 				vitals.cpuUsage                        = roomStat.cpuUsage;
+				vitals.userId                          = userStat.id.substring(0, userStat.id.lastIndexOf("_"));
+				vitals.resourceId                      = resourceId;
+				vitals.applicationId                   = applicationId;
+				vitals.reflectorId                     = roomStat.reflectorId;
+				vitals.transportInformation            = roomStat.transportInformation;
 				vitals.maxEncodePixelRate              = roomStat.maxEncodePixelRate;
 				vitals.maxDecodePixelRate              = roomStat.maxDecodePixelRate;
 				vitals.currentCpuEncodePixelRate       = roomStat.currentCpuEncodePixelRate;
@@ -820,7 +829,7 @@ function VidyoStats(containerId) {
 		}
 		return stats;
 	}
-	function RenderOverview(stats)  {
+	function RenderOverview(stats, vitals)  {
 		/* keep the bandwidth totals cumulative */
 		var sendStreamBitRateTotal = 0;
 		var sendStreamPixelRateTotal = 0;
@@ -1026,9 +1035,11 @@ function VidyoStats(containerId) {
 		var txBandwidthTable = '';	
 		var rxBandwidthTable = '';	
 		var pixelRateTable = '';	
-		var vitalsTable = '';	
+		var vitalsTable = '';
+		var overviewTable = '';	
 		var sourcesTable = '';
 		var rateShaperTable = '';
+		var transportTable = '';
 				
 		var rxVideoTable = '';		
 		rxVideoTable += '<table class="stats">';
@@ -1261,7 +1272,7 @@ function VidyoStats(containerId) {
 				vitalsTable += '<table class="stats">';
 				vitalsTable +=		'<tr>';
 				vitalsTable +=			'<td>CPU</td>';
-				vitalsTable +=			'<td title="CPU %">' + roomStat.cpuUsage + '</td>';
+				vitalsTable +=			'<td title="CPU %">' + vitals.cpuUsage + '</td>';
 				vitalsTable +=		'</tr>';
 				vitalsTable +=		'<tr>';
 				vitalsTable +=			'<td>Timestamp</td>';
@@ -1272,14 +1283,46 @@ function VidyoStats(containerId) {
 				vitalsTable +=			'<td title="Application Tag">' + stats.applicationTag + '</td>';
 				vitalsTable +=		'</tr>';
 				vitalsTable +=		'<tr>';
-				vitalsTable +=			'<td>Library Version</td>';
-				vitalsTable +=			'<td title="Library Version">' + stats.libraryVersion + '</td>';
+				vitalsTable +=			'<td>Version</td>';
+				vitalsTable +=			'<td title="Version">' + stats.libraryVersion + '</td>';
 				vitalsTable +=		'</tr>';
-				vitalsTable +=		'<tr>';
-				vitalsTable +=			'<td>Build Tag</td>';
-				vitalsTable +=			'<td title="Build Tag">' + stats.buildTag + '</td>';
-				vitalsTable +=		'</tr>';
-				vitalsTable += '</table>';
+				
+				overviewTable += '</table>';
+				
+				overviewTable += '<table class="stats">';
+				overviewTable +=		'<tr>';
+				overviewTable +=			'<td>UserId</td>';
+				overviewTable +=			'<td title="UserId">' + vitals.userId + '</td>';
+				overviewTable +=		'</tr>';
+				overviewTable +=		'<tr>';
+				overviewTable +=			'<td>ResourceId</td>';
+				overviewTable +=			'<td title="ResourceId">' + vitals.resourceId + '</td>';
+				overviewTable +=		'</tr>';
+				overviewTable +=		'<tr>';
+				overviewTable +=			'<td>ApplicationId</td>';
+				overviewTable +=			'<td title="ApplicationId">' + vitals.applicationId + '</td>';
+				overviewTable +=		'</tr>';
+				overviewTable +=		'<tr>';
+				overviewTable +=			'<td>ReflectorId</td>';
+				overviewTable +=			'<td title="ReflectorId">' + vitals.reflectorId + '</td>';
+				overviewTable +=		'</tr>';
+				overviewTable += '</table>';
+				
+				transportTable += '<table class="stats">';
+				transportTable +=		'<tr>';
+				transportTable +=			'<th></th>';
+				transportTable +=			'<th title="Interface">Interface</th>';
+				transportTable +=			'<th title="PlugIn">PlugIn</th>';
+				transportTable +=		'</tr>';
+				for (var i in vitals.transportInformation) {
+					var transportInformation = vitals.transportInformation[i];
+					transportTable +=		'<tr>';
+					transportTable +=			'<td title="Type">' + transportInformation.connectionType + '</td>';
+					transportTable +=			'<td title="Interface">' + transportInformation.interfaceType + '</td>';
+					transportTable +=			'<td title="PlugIn">' + transportInformation.transportPlugIn + '</td>';
+					transportTable +=		'</tr>';
+				}
+				transportTable += '</table>';
 				
 				sourcesTable += '<table class="stats">';
 				sourcesTable +=		'<tr>';
@@ -1300,13 +1343,19 @@ function VidyoStats(containerId) {
 		txBandwidthTable = $(txBandwidthTable);
 		rxBandwidthTable = $(rxBandwidthTable);
 		rateShaperTable = $(rateShaperTable);
+		transportTable = $(transportTable);
 		pixelRateTable = $(pixelRateTable);
 		vitalsTable = $(vitalsTable);
+		overviewTable = $(overviewTable);
 		sourcesTable = $(sourcesTable);
 		
 		var vitalsRow = $('<div/>', { id: "Vitals", class: "floatTables" });
 		vitalsRow.append("<h1>Vitals</h1>")
 			.append(vitalsTable);
+			
+		var overviewRow = $('<div/>', { id: "Overview", class: "floatTables" });
+		overviewRow.append("<h1>Overview</h1>")
+			.append(overviewTable);
 			
 		var sourcesRow = $('<div/>', { id: "Sources", class: "floatTables" });
 		sourcesRow.append("<h1>Sources</h1>")
@@ -1320,9 +1369,13 @@ function VidyoStats(containerId) {
 		rateShaperRow.append("<h1>Rate Shaper</h1>")
 			.append(rateShaperTable);
 			
+		var transportRow = $('<div/>', { id: "Transport", class: "floatTables" });
+		transportRow.append("<h1>Transport</h1>")
+			.append(transportTable);
+			
 		var txRow = $('<div/>', { id: "TX", class: "TX" });
-		txRow.append("<h1>TX</h1>")
-			.append("<h2>Bandwidth</h2>")
+		txRow.append("<h1>Local</h1>")
+			.append("<h2>TX</h2>")
 			.append(txBandwidthTable)
 			.append("<h2>Video</h2>")
 			.append(txVideoTable)
@@ -1332,8 +1385,8 @@ function VidyoStats(containerId) {
 			.append(txAudioTable);
 
 		var rxRow = $('<div/>', { id: "RX", class: "RX" });
-		rxRow.append("<h1>RX</h1>")
-			.append("<h2>Bandwidth</h2>")
+		rxRow.append("<h1>Remote</h1>")
+			.append("<h2>RX</h2>")
 			.append(rxBandwidthTable)
 			.append("<h2>Video</h2>")
 			.append(rxVideoTable)
@@ -1347,7 +1400,8 @@ function VidyoStats(containerId) {
 		
 		var jsonRow = $('<div/>', { id: "JsonView" + stats.logLineId, class: "JsonView" });
 
-		output.append(vitalsRow).append(sourcesRow).append(pixelRateRow).append(rateShaperRow).append(txRow).append(rxRow).append("<div class='EndStats'></div>").append(jsonRow);
+		/* disable RateShaperRow and PixelRateRow, if adding later add .append(pixelRateRow).append(rateShaperRow) after sourcesRow */
+		output.append(vitalsRow).append(overviewRow).append(transportRow).append(sourcesRow).append(txRow).append(rxRow).append("<div class='EndStats'></div>").append(jsonRow);
 		
 		$("JsonView" + stats.logLineId).JSONView(stats, { collapsed: false });
 		
