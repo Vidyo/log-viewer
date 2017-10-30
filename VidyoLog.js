@@ -1103,6 +1103,70 @@ function VidyoStats(containerId) {
 		rxDynamicTable += '</table>';
 		rxDynamicTable = $(rxDynamicTable);
 		
+		vitalsTable += '<table class="stats">';
+		vitalsTable +=		'<tr>';
+		vitalsTable +=			'<td>CPU</td>';
+		vitalsTable +=			'<td title="CPU %">' + vitals.cpuUsage + '</td>';
+		vitalsTable +=		'</tr>';
+		vitalsTable +=		'<tr>';
+		vitalsTable +=			'<td>Timestamp</td>';
+		vitalsTable +=			'<td title="Timestamp">' + stats.timeStamp + '</td>';
+		vitalsTable +=		'</tr>';
+		vitalsTable +=		'<tr>';
+		vitalsTable +=			'<td>Application Tag</td>';
+		vitalsTable +=			'<td title="Application Tag">' + stats.applicationTag + '</td>';
+		vitalsTable +=		'</tr>';
+		vitalsTable +=		'<tr>';
+		vitalsTable +=			'<td>Version</td>';
+		vitalsTable +=			'<td title="Version">' + stats.libraryVersion + '</td>';
+		vitalsTable +=		'</tr>';
+		vitalsTable += '</table>';
+		
+		overviewTable += '<table class="stats">';
+		overviewTable +=		'<tr>';
+		overviewTable +=			'<td>UserId</td>';
+		overviewTable +=			'<td title="UserId">' + vitals.userId + '</td>';
+		overviewTable +=		'</tr>';
+		overviewTable +=		'<tr>';
+		overviewTable +=			'<td>ResourceId</td>';
+		overviewTable +=			'<td title="ResourceId">' + vitals.resourceId + '</td>';
+		overviewTable +=		'</tr>';
+		overviewTable +=		'<tr>';
+		overviewTable +=			'<td>ApplicationId</td>';
+		overviewTable +=			'<td title="ApplicationId">' + vitals.applicationId + '</td>';
+		overviewTable +=		'</tr>';
+		overviewTable +=		'<tr>';
+		overviewTable +=			'<td>ReflectorId</td>';
+		overviewTable +=			'<td title="ReflectorId">' + vitals.reflectorId + '</td>';
+		overviewTable +=		'</tr>';
+		overviewTable += '</table>';
+		
+		if (stats.logStats) {
+			logTable += '<table class="stats">';
+			logTable +=		'<tr>';
+			logTable +=			'<th title="Type">Type</th>';
+			logTable +=			'<th title="Function:line">Function</th>';
+			logTable +=			'<th title="Num">Num</th>';
+			logTable +=		'</tr>';
+			for (var i in stats.logStats.logErrorDataStats) {
+				var logStat = stats.logStats.logErrorDataStats[i];
+				logTable +=		'<tr>';
+				logTable +=			'<td title="Type">Error</td>';
+				logTable +=			'<td title="Function:line">' + logStat.name + '</td>';
+				logTable +=			'<td title="Num">' + logStat.occurances + '</td>';
+				logTable +=		'</tr>';
+			}
+			for (var i in stats.logStats.logWarningDataStats) {
+				var logStat = stats.logStats.logWarningDataStats[i];
+				logTable +=		'<tr>';
+				logTable +=			'<td title="Type">Warning</td>';
+				logTable +=			'<td title="Function:line">' + logStat.name + '</td>';
+				logTable +=			'<td title="Num">' + logStat.occurances + '</td>';
+				logTable +=		'</tr>';
+			}
+		}
+		logTable += '</table>';
+		
 		/* Receiving streams */
 		for (var iu in stats.userStats) {
 			var userStat = stats.userStats[iu];
@@ -1270,44 +1334,6 @@ function VidyoStats(containerId) {
 				pixelRateTable +=		'</tr>';
 				pixelRateTable += '</table>';
 				
-				vitalsTable += '<table class="stats">';
-				vitalsTable +=		'<tr>';
-				vitalsTable +=			'<td>CPU</td>';
-				vitalsTable +=			'<td title="CPU %">' + vitals.cpuUsage + '</td>';
-				vitalsTable +=		'</tr>';
-				vitalsTable +=		'<tr>';
-				vitalsTable +=			'<td>Timestamp</td>';
-				vitalsTable +=			'<td title="Timestamp">' + stats.timeStamp + '</td>';
-				vitalsTable +=		'</tr>';
-				vitalsTable +=		'<tr>';
-				vitalsTable +=			'<td>Application Tag</td>';
-				vitalsTable +=			'<td title="Application Tag">' + stats.applicationTag + '</td>';
-				vitalsTable +=		'</tr>';
-				vitalsTable +=		'<tr>';
-				vitalsTable +=			'<td>Version</td>';
-				vitalsTable +=			'<td title="Version">' + stats.libraryVersion + '</td>';
-				vitalsTable +=		'</tr>';
-				
-				overviewTable += '</table>';
-				
-				overviewTable += '<table class="stats">';
-				overviewTable +=		'<tr>';
-				overviewTable +=			'<td>UserId</td>';
-				overviewTable +=			'<td title="UserId">' + vitals.userId + '</td>';
-				overviewTable +=		'</tr>';
-				overviewTable +=		'<tr>';
-				overviewTable +=			'<td>ResourceId</td>';
-				overviewTable +=			'<td title="ResourceId">' + vitals.resourceId + '</td>';
-				overviewTable +=		'</tr>';
-				overviewTable +=		'<tr>';
-				overviewTable +=			'<td>ApplicationId</td>';
-				overviewTable +=			'<td title="ApplicationId">' + vitals.applicationId + '</td>';
-				overviewTable +=		'</tr>';
-				overviewTable +=		'<tr>';
-				overviewTable +=			'<td>ReflectorId</td>';
-				overviewTable +=			'<td title="ReflectorId">' + vitals.reflectorId + '</td>';
-				overviewTable +=		'</tr>';
-				overviewTable += '</table>';
 				
 				transportTable += '<table class="stats">';
 				transportTable +=		'<tr>';
@@ -1324,30 +1350,6 @@ function VidyoStats(containerId) {
 					transportTable +=		'</tr>';
 				}
 				transportTable += '</table>';
-				
-				logTable += '<table class="stats">';
-				logTable +=		'<tr>';
-				logTable +=			'<th title="Type">Type</th>';
-				logTable +=			'<th title="Function:line">Function</th>';
-				logTable +=			'<th title="Num">Num</th>';
-				logTable +=		'</tr>';
-				for (var i in stats.logStats.logErrorDataStats) {
-					var logStat = stats.logStats.logErrorDataStats[i];
-					logTable +=		'<tr>';
-					logTable +=			'<td title="Type">Error</td>';
-					logTable +=			'<td title="Function:line">' + logStat.name + '</td>';
-					logTable +=			'<td title="Num">' + logStat.occurances + '</td>';
-					logTable +=		'</tr>';
-				}
-				for (var i in stats.logStats.logWarningDataStats) {
-					var logStat = stats.logStats.logWarningDataStats[i];
-					logTable +=		'<tr>';
-					logTable +=			'<td title="Type">Warning</td>';
-					logTable +=			'<td title="Function:line">' + logStat.name + '</td>';
-					logTable +=			'<td title="Num">' + logStat.occurances + '</td>';
-					logTable +=		'</tr>';
-				}
-				logTable += '</table>';
 				
 				sourcesTable += '<table class="stats">';
 				sourcesTable +=		'<tr>';
