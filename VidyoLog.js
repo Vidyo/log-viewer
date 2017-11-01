@@ -1282,11 +1282,11 @@ function VidyoStats(containerId) {
 				rateShaperTable += '<table class="stats">';
 				rateShaperTable +=		'<tr>';
 				rateShaperTable +=			'<th></th>';
-				rateShaperTable +=			'<th title="Delay Normal">Delay N</th>';
-				rateShaperTable +=			'<th title="Delay Retransmit">Delay R</th>';
-				rateShaperTable +=			'<th title="Packets Normal">Packets N</th>';
-				rateShaperTable +=			'<th title="Packets Retransmit">Packets R</th>';
-				rateShaperTable +=			'<th title="Drop Normal">Drop N</th>';
+				rateShaperTable +=			'<th title="Delay Normal">D_N</th>';
+				rateShaperTable +=			'<th title="Delay Retransmit">D_R</th>';
+				rateShaperTable +=			'<th title="Packets Normal">P_N</th>';
+				rateShaperTable +=			'<th title="Packets Retransmit">P_R</th>';
+				rateShaperTable +=			'<th title="Drop Normal">Dr_N</th>';
 				rateShaperTable +=		'</tr>';
 				rateShaperTable +=		'<tr>';
 				rateShaperTable +=			'<td>Video</td>';
