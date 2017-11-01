@@ -50,6 +50,7 @@ function VidyoLog(containerId) {
 			}
 		}
 	}
+	 
 	this.SetServerSideFilter = function(filter) {
 		logRecordsFilter = filter;
 	}
@@ -159,12 +160,9 @@ function VidyoLog(containerId) {
 		var logLine = new Object();
 		
 		var logJson = JSON.parse(logLineUnparsed);
-		var date = logJson.result.logTimeStamp
-		date = date.substring(0, date.lastIndexOf('.'));
-		date = date.replace(/ /g, 'T') + "Z";
 		
 		logLine.id = "logLine" + id;
-		logLine.time =  new Date(date);
+		logLine.time =  VidyoParseLogDate(logJson.result.logTimeStamp);
 		
 		/* check for valid header */
 		if(logLine.time.getFullYear()) {			
@@ -614,28 +612,27 @@ function VidyoStats(containerId) {
 		xaxis: {showgrid: false, zeroline: false },
 		height: 200,
 		showlegend: true,
-		legend: {
-			x: 0,
-			y: 1,
-			traceorder: 'normal',
-			font: {
-			  family: 'sans-serif',
-			  size: 12,
-			  color: '#000'
-			},
-			bgcolor: '#E2E2E2',
-			bordercolor: '#FFFFFF',
-			borderwidth: 2
-		},
 		margin: {
 			t: 10
 		},
+		autoresize: true
 	},
 	{
 		displaylogo: false,
 		displayModeBar: false
 	});
 	$("#availableResources").on('plotly_click', function(event,data){
+		annotate_text = ''+ data["points"][0].x;
+
+		annotation = {
+		  text: annotate_text,
+		  x: data["points"][0].x,
+		  y: parseFloat(data["points"][0].y.toPrecision(4))
+		}
+
+		annotations = [];
+		annotations.push(annotation);
+		Plotly.relayout("availableResources",{annotations: annotations})
 		ShowOverview(data["points"][0].x);
 	});
 	
@@ -644,7 +641,11 @@ function VidyoStats(containerId) {
 	$("#" + containerId).append($('<div/>', { id: "json", class: "json" }));
 		
 	window.onresize = function() {
-	    Plotly.Plots.resize("availableResources");
+		var update = {
+			width: $("#availableResources").width(),
+			height: $("#availableResources").height()
+		};
+		Plotly.relayout("availableResources", update);
 	};
   
 	this.ProcessLogLine = function(logLine){
@@ -845,8 +846,7 @@ function VidyoStats(containerId) {
 		    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		}
 
-		function LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoSourcesTableObj, txBitRate) {
-			txBitRate += sendStreamStat["sendNetworkBitRate"];
+		function LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoSourcesTableObj) {
 			sendStreamBitRateTotal   += sendStreamStat["sendNetworkBitRate"];
 			sendStreamPixelRateTotal += (sendStreamStat["width"] * sendStreamStat["height"] * sendStreamStat["fpsSent"]);
 			
@@ -864,8 +864,7 @@ function VidyoStats(containerId) {
 			
 			txVideoSourcesTableObj.append(txVideoSourcesTable);
 		}
-		function LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioSourcesTableObj, txBitRate) {
-			txBitRate += sendStreamStat["sendNetworkBitRate"];
+		function LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioSourcesTableObj) {
 			sendStreamBitRateTotal += sendStreamStat["sendNetworkBitRate"];
 
 			var txAudioSourcesTable = '';
@@ -884,8 +883,7 @@ function VidyoStats(containerId) {
 			txAudioSourcesTableObj.append(txAudioSourcesTable);	
 		}
 				
-		function RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxVideoSinkTableObj, rxBitRate) {
-			rxBitRate += remoteDeviceStat["receiveNetworkBitRate"];
+		function RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxVideoSinkTableObj) {
 			receiveStreamBitRateTotal   += remoteDeviceStat["receiveNetworkBitRate"];
 			receiveStreamPixelRateTotal += (remoteDeviceStat["width"] * remoteDeviceStat["height"] * remoteDeviceStat["fpsDecoderInput"]);
 
@@ -905,8 +903,7 @@ function VidyoStats(containerId) {
 			rxVideoSinkTableObj.append(rxVideoSinkTable);	
 		}
 				
-		function RemoteStreamAudioParse(remoteDeviceStat, participantStat, rxAudioSinkTableObj, rxBitRate) {
-			rxBitRate += remoteDeviceStat["receiveNetworkBitRate"];
+		function RemoteStreamAudioParse(remoteDeviceStat, participantStat, rxAudioSinkTableObj) {
 			receiveStreamBitRateTotal += remoteDeviceStat["receiveNetworkBitRate"];
 			
 			/* Audio debug for speaker streams */
@@ -967,7 +964,8 @@ function VidyoStats(containerId) {
 			for (var j in deviceStat.remoteRendererStreams) {
 				var sendStreamStat = deviceStat.remoteRendererStreams[j];
 				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoTable, txVideoBitRate);
+				LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoTable);
+				txVideoBitRate += sendStreamStat["sendNetworkBitRate"];
 			}
 		}
 		
@@ -992,7 +990,8 @@ function VidyoStats(containerId) {
 			for (var j in deviceStat.remoteRendererStreams) {
 				var sendStreamStat = deviceStat.remoteRendererStreams[j];
 				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTable, txContentBitRate);
+				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTable);
+				txContentBitRate += sendStreamStat["sendNetworkBitRate"];
 			}
 		}
 		/* monitors */
@@ -1002,7 +1001,8 @@ function VidyoStats(containerId) {
 			for (var j in deviceStat.remoteRendererStreams) {
 				var sendStreamStat = deviceStat.remoteRendererStreams[j];
 				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTable, txContentBitRate);
+				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTable);
+				txContentBitRate += sendStreamStat["sendNetworkBitRate"];
 			}
 		}
 		
@@ -1028,7 +1028,8 @@ function VidyoStats(containerId) {
 			for (var j in deviceStat.remoteSpeakerStreams) {
 				var sendStreamStat = deviceStat.remoteSpeakerStreams[j];
 				/* find stream if already exists */
-				LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioTable, txAudioBitRate);
+				LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioTable);
+				txAudioBitRate += sendStreamStat["sendNetworkBitRate"];
 			}
 		}
 		
@@ -1181,18 +1182,20 @@ function VidyoStats(containerId) {
 					/* iterate through all the remote cameras */
 					for (var j in participantStat.remoteCameraStats) {
 						var remoteDeviceStat = participantStat.remoteCameraStats[j];
-						RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxVideoTable, rxVideoBitRate);
+						RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxVideoTable);
+						rxVideoBitRate += remoteDeviceStat["receiveNetworkBitRate"];
 					}
 					/* iterate through all the remote window shares */
 					for (var j in participantStat.remoteWindowShareStats) {
 						var remoteDeviceStat = participantStat.remoteWindowShareStats[j];
-						RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxContentTable, rxContentBitRate);
+						RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxContentTable);
+						rxContentBitRate += remoteDeviceStat["receiveNetworkBitRate"];
 					}
 					/* iterate through all the remote microphone */
 					for (var j in participantStat.remoteMicrophoneStats) {
 						var remoteDeviceStat = participantStat.remoteMicrophoneStats[j];
-						RemoteStreamAudioParse(remoteDeviceStat, participantStat, rxAudioTable, rxAudioBitRate);
-
+						RemoteStreamAudioParse(remoteDeviceStat, participantStat, rxAudioTable);
+						rxAudioBitRate += remoteDeviceStat["receiveNetworkBitRate"];
 					}
 				}
 				for (var i in roomStat.participantGenerationStats) {
@@ -1433,7 +1436,7 @@ function VidyoStats(containerId) {
 		var jsonRow = $('<div/>', { id: "JsonView" + stats.logLineId, class: "JsonView" });
 
 		/* disable RateShaperRow and PixelRateRow, if adding later add .append(pixelRateRow).append(rateShaperRow) after sourcesRow */
-		output.append(vitalsRow).append(overviewRow).append(transportRow).append(sourcesRow).append(logRow).append(txRow).append(rxRow).append("<div class='EndStats'></div>").append(jsonRow);
+		output.append(vitalsRow).append(overviewRow).append(pixelRateRow).append(rateShaperRow).append(transportRow).append(sourcesRow).append(logRow).append(txRow).append(rxRow).append("<div class='EndStats'></div>").append(jsonRow);
 		
 		$("JsonView" + stats.logLineId).JSONView(stats, { collapsed: false });
 		
@@ -1476,3 +1479,9 @@ function VidyoStats(containerId) {
 		Plotly.extendTraces("availableResources", availableResources, availableResourcesIndexes, 100);
 	}
 };
+
+function VidyoParseLogDate(date) {
+	date = date.substring(0, date.lastIndexOf('.'));
+	date = date.replace(/ /g, 'T') + "Z";
+	return new Date(date);
+}
