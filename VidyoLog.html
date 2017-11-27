@@ -1,15 +1,25 @@
-<!DOCTYPE html> 
-<html> 
-<head> 
-<title>Vidyo Log Viewer</title> 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" rel="stylesheet" type="text/css" >
-<link href="VidyoLog.css" rel="stylesheet" type="text/css" >
-<script src="VidyoLog.js"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Vidyo Logger</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.0.0-beta.2/dist/lumen/bootstrap.min.css" />
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css" rel="stylesheet" type="text/css" >
+	<link href="VidyoLog.css" rel="stylesheet" type="text/css" >
+	<script src="VidyoLog.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js" integrity="sha256-N4u5BjTLNwmGul6RgLoESPNqDFVUibVuOYhP4gJgrew=" crossorigin="anonymous"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  	<script type="text/javascript">
 function VidyoLogViewer() {
 	var logServers = []; /* store servers */
 	var serverId = 1;
@@ -19,33 +29,14 @@ function VidyoLogViewer() {
 	this.Init = function(containerDivId) {
 		
 		function InitialLayout(containerDivId) {
-			var html =  "<div id='header'/>";
-			html +=     "<div id='right'></div>";
-			$("#" + containerDivId).html(html);
-			
-			html = 
-			"<textarea class='inputLog' id='inputLog' value='' placeholder='[Add Server]' />" +
-			"<span class='logServers' id='logServers' />" +
-			"<label id='processing' ></label>"+
-			"<textarea class='fileLog' id='fileLog' value='' placeholder='[Paste the log]' />" +
-			"<textarea class='searchLog' id='searchLog'   value='' placeholder='[Local Filter]' />";
-			
-			$("#header").append(html);
-			
-			vidyoLog = new VidyoLog("right");
+			vidyoLog = new VidyoLog("rootElement");
 			
 			$("#fileLog").bind('input propertychange', function() {
 				vidyoLog.ProcessLogFile($(this).val());
 				$(this).val("");
 			});
-			$("#inputLog").keyup(function(e){
-				var code = (e.keyCode ? e.keyCode : e.which);
-				if(code == 13) { //Enter keycode
-					var value = $(this).val();
-					var valueTrim = value.slice(0,-1);
-					$(this).val("");
-					AddServer(valueTrim, valueTrim);
-				}
+			$("#serverLog").click(function(e){
+				AddServer($("#serverLogInput").val(), $("#serverLogInput").val());
 			});
 			$("#filterLog").keyup(function(e){
 				var code = (e.keyCode ? e.keyCode : e.which);
@@ -56,24 +47,22 @@ function VidyoLogViewer() {
 					vidyoLog.SetServerSideFilter(valueTrim);
 				}
 			});
-			$("#searchLog").keyup(function(e){
-				var code = (e.keyCode ? e.keyCode : e.which);
-				if(code == 13) { //Enter keycode
-					var value = $(this).val();
-					var valueTrim = value.slice(0,-1);
-					$(this).val(valueTrim);
-					vidyoLog.Search(valueTrim);
-				}
+			$("#searchLog").click(function(){
+				vidyoLog.Search($("#searchLogInput").val());
+				return false;
 			});
 		}
 		
 		function AddServer(serverName, serverHOST) {
-			var html = "<span id='serverIDRemove-" + serverId + "' class='logServerValues " + "colorID-" + serverId%10 + "'>" + serverName + "</span>";
+			var html = '<a class="dropdown-item" id="serverIDRemove-' + serverId + '" href="#"><button type="button" id="serverIDRemoveButton-' + serverId + '" class="btn btn-secondary btn-sm">x</button> ' + serverName + '</a>';
+			  
 			$("#logServers").append(html);
-			$("#serverIDRemove-" + serverId).data("serverHOST", serverHOST);
-			$("#serverIDRemove-" + serverId).click(function() {
+			$("#serverIDRemoveButton-" + serverId).data("serverHOST", serverHOST);
+			$("#serverIDRemoveButton-" + serverId).data("serverId", serverId);
+			$("#serverIDRemoveButton-" + serverId).click(function() {
+				var serverId = $(this).data("serverId");
 				var serverHOST = $(this).data("serverHOST");
-				$(this).remove();
+				$("#serverIDRemove-" + serverId).remove();
 				vidyoLog.RemoveServer(serverHOST);
 			});
 			vidyoLog.AddServer(serverName, serverHOST);
@@ -90,8 +79,52 @@ $(document).ready(function()
 	vidyoLogViewer = new VidyoLogViewer();
 	vidyoLogViewer.Init("rootElement");
 });
-</script>
-</head> 
-<body id="rootElement" style="width:100%;height:100%">
-</body>
+	</script>
+  </head>
+  <body>
+  	<!-- Image and text -->
+  	<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+	  <a class="navbar-brand" href="#">
+		<img src="https://vidyo.io/wp-content/uploads/2016/10/Vidyo-io-Logo.png" width="110" height="30" class="d-inline-block align-top" alt="">
+		Logger
+	  </a>
+	  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+		<ul class="navbar-nav">
+		  <li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Upload File
+			</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+			  <a class="dropdown-item" href="#">
+			  	<div class="form-group">
+					<textarea class="form-control mr-sm-2" type="search" placeholder="Paste file here" aria-label="Upload" id="fileLog" ></textarea>
+				</div>
+			  </a>
+			  <div class="dropdown-item" id="processing"></div>
+			</div>
+		  </li>
+		  <li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			  Servers
+			</a>
+			<div class="dropdown-menu" id="logServers" aria-labelledby="navbarDropdownMenuLink">
+			  <a class="dropdown-item" href="#">
+				  <form class="form-inline inlineBlock">
+					<input class="form-control mr-sm-2" type="search" placeholder="Server:port" aria-label="Upload" id="serverLogInput">
+					<button class="btn btn-success my-2 my-sm-0" type="submit" id="serverLog">Add</button>
+				  </form>	  
+			  </a>
+			</div>
+		  </li>
+		</ul>
+	  </div>
+	  <form class="form-inline">
+		<input class="form-control mr-sm-2" type="search" placeholder="RegEx, empty to reset" aria-label="Search" id="searchLogInput">
+		<button class="btn btn-success my-2 my-sm-0" type="submit" id="searchLog">Search</button>
+	  </form>
+	</nav>
+	<div id="rootElement"></div>
+    <!-- <div id="rootElement" style="width:100%;height:100%">Hello, world!</div>
+	-->
+   </body>
 </html>
