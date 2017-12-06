@@ -812,7 +812,7 @@ function VidyoStats(containerId) {
 		
 		vitals.timeStamp = stats.timeStamp;
 		vitals.timeStampDateFormat = new Date(stats.timeStamp.replace(" ", "T") + "Z");
-		vitals.connectTimeDateFormat = new Date(stats.connectTime.replace(" ", "T") + "Z");
+		vitals.connectTimeDateFormat =  stats.connectTime? new Date(stats.connectTime.replace(" ", "T") + "Z") : new Date(0);
 		if (vitals.connectTimeDateFormat.getTime() > 0) {
 			vitals.connectTime = "Connected for " + Math.round((vitals.timeStampDateFormat.getTime() - vitals.connectTimeDateFormat.getTime()) / 1000) + " secs";
 		} else {
@@ -970,7 +970,11 @@ function VidyoStats(containerId) {
 		var output = $("<div class='statsData' />");
 		
 		function numberWithCommas(x) {
-		    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+			if (x) {
+				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		   	} else {
+		   		return "NaN";
+		   	}
 		}
 		function convertToMs(x) {
 			if (x == 9223372036854776000) {
@@ -1335,10 +1339,10 @@ function VidyoStats(containerId) {
 		cardsTable += addResourceCard("CPU", vitals.cpuUsage);
 		*/
 				
-		var bandwidthEncodePct = (Math.min(vitals["currentBandwidthEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100;
-		var bandwidthDecodePct = (Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100;
-		var cpuEncodePct = (Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100;
-		var cpuDecodePct = (Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100;
+		var bandwidthEncodePct = Math.round((Math.min(vitals["currentBandwidthEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100);
+		var bandwidthDecodePct =  Math.round((Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100);
+		var cpuEncodePct =  Math.round((Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100);
+		var cpuDecodePct =  Math.round((Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100);
 		
 		/* fixme the library produces 0 for bandwith when resource manager is not activated. remove when library is fixed */
 		bandwidthEncodePct = bandwidthEncodePct == 0 ? 100 : bandwidthEncodePct;
@@ -1376,7 +1380,7 @@ function VidyoStats(containerId) {
 		vitalsTable +=   '<tbody>';
 		vitalsTable +=		'<tr>';
 		vitalsTable +=			'<td>Timestamp</td>';
-		vitalsTable +=			'<td title="Timestamp">' + stats.timeStamp + '</td>';
+		vitalsTable +=			'<td title="Timestamp">' + stats.timeStamp + ' UTC</td>';
 		vitalsTable +=		'</tr>';
 		vitalsTable +=		'<tr>';
 		vitalsTable +=			'<td>Connected</td>';
