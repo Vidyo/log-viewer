@@ -1365,8 +1365,8 @@ function VidyoStats(containerId) {
 		availableTable +=		'</tr>';
 		availableTable +=		'<tr>';
 		availableTable +=			'<td title="Amount of Bandwidth available on the endpoint">Network</td>';
-		availableTable +=			'<td title="Available Decode Bandwidth">' + bandwidthDecodePct + '%</td>';
 		availableTable +=			'<td title="Available Encode Bandwidth">' + bandwidthEncodePct + '%</td>';
+		availableTable +=			'<td title="Available Decode Bandwidth">' + bandwidthDecodePct + '%</td>';
 		availableTable +=		'</tr>';
 		/* Close the table after iterating rooms */
 				
