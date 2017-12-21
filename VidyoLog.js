@@ -1030,6 +1030,7 @@ function VidyoStats(containerId) {
 			rxVideoSinkTable +=		'<tr>';
 			rxVideoSinkTable +=			'<td title="Name">' + remoteDeviceStat.name + '</td>';
 			rxVideoSinkTable +=			'<td title="Participant">' + participantStat.name + '</td>';
+			rxVideoSinkTable +=			'<td title="UserId">' + participantStat.userId.substring(0, participantStat.userId.lastIndexOf("_")) + '</td>';
 			rxVideoSinkTable +=			'<td title="Codec">' + remoteDeviceStat["codecName"] + '</td>';
 			rxVideoSinkTable +=			'<td title="Show - Received">' + remoteDeviceStat["showWidth"] + '/' + remoteDeviceStat["showHeight"] + '-' + remoteDeviceStat["width"] + '/' + remoteDeviceStat["height"] + '</td>';
 			rxVideoSinkTable +=			'<td title="Show/Received/Decoded/Displayed">' + remoteDeviceStat["showFrameRate"] + '/' + remoteDeviceStat["fpsDecoderInput"] + '/' + remoteDeviceStat["fpsDecoded"] + '/' + remoteDeviceStat["fpsRendered"] + '</td>';
@@ -1052,6 +1053,7 @@ function VidyoStats(containerId) {
 				rxAudioSinkTable +=		'<tr>';
 				rxAudioSinkTable +=			'<td title="Name">' + remoteDeviceStat.name + '</td>';
 				rxAudioSinkTable +=			'<td title="Participant">' + participantStat.name + '</td>';
+				rxAudioSinkTable +=			'<td title="UserId">' + participantStat.userId.substring(0, participantStat.userId.lastIndexOf("_")) + '</td>';
 				rxAudioSinkTable +=			'<td title="Codec">' + remoteDeviceStat["codecName"] + '</td>';
 				rxAudioSinkTable +=			'<td title="SampleRate">' + remoteDeviceStat["sampleRateSet"] + '</td>';
 				rxAudioSinkTable +=			'<td title="Channels">' + remoteDeviceStat["numberOfChannels"] + '</td>';
@@ -1224,6 +1226,7 @@ function VidyoStats(containerId) {
 		rxVideoTable +=		'<tr>';
 		rxVideoTable +=			'<th title="Camera">Camera</th>';
 		rxVideoTable +=			'<th title="Participant">Participant</th>';
+		rxVideoTable +=			'<th title="UserId">UserId</th>';
 		rxVideoTable +=			'<th title="Codec">Decoder</th>';
 		rxVideoTable +=			'<th title="Show - Received">Resolution</th>';
 		rxVideoTable +=			'<th title="Show/Received/Decoded/Displayed">FPS</th>';
@@ -1244,6 +1247,7 @@ function VidyoStats(containerId) {
 		rxContentTable +=		'<tr>';
 		rxContentTable +=			'<th title="Content">Content</th>';
 		rxContentTable +=			'<th title="Participant">Participant</th>';
+		rxContentTable +=			'<th title="UserId">UserId</th>';
 		rxContentTable +=			'<th title="Codec">Decoder</th>';
 		rxContentTable +=			'<th title="Show - Received">Resolution</th>';
 		rxContentTable +=			'<th title="Show/Received/Decoded/Displayed">FPS</th>';
@@ -1263,6 +1267,7 @@ function VidyoStats(containerId) {
 		rxAudioTable +=		'<tr>';
 		rxAudioTable +=			'<th title="Microphone">Microphone</th>';
 		rxAudioTable +=			'<th title="Participant">Participant</th>';
+		rxAudioTable +=			'<th title="UserId">UserId</th>';
 		rxAudioTable +=			'<th title="Codec">Decoder</th>';
 		rxAudioTable +=			'<th title="SampleRate">Rate</th>';
 		rxAudioTable +=			'<th title="Channels">Ch</th>';
