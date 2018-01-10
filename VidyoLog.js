@@ -769,6 +769,10 @@ function VidyoStats(containerId) {
 	$("#" + containerId).append(logTableDiv);
 		
 	this.ProcessLogLine = function(logLine){
+		/* check for json object open bracket */
+		if (logLine.body[0] != "{")
+			return null;
+			
 		if (logLine.functionName == "VidyoRoomStatisticsAsyncRun" || logLine.functionName == "VidyoEndpointStatisticsRun") {
 			/* Client Log */
 			var stats = $.parseJSON(logLine.body);
