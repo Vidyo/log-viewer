@@ -308,11 +308,33 @@ function VidyoLog(containerId) {
 		var tdBody = $('<td/>', {
 			class: "logBody " + logLine.level,
 			html: logBody.body.html(),
-			colspan: "7"
 		});
 		/* JSON stats */
 		tdBody.append("<div id='statsJson_" + logLine.id + "'></div>");
-		tr.append(tdBody);
+		var tdSentRequest = $('<td/>', {
+			class: "logGoTo"
+		});
+		var tdReceivedRequest = $('<td/>', {
+			class: "logGoTo"
+		});
+		var tdSentResponse = $('<td/>', {
+			class: "logGoTo"
+		});
+		var tdReceivedResponse = $('<td/>', {
+			class: "logGoTo"
+		});
+		var tdIndex = $('<th/>', {
+			class: "logIndex " + logLine.colorId,
+			title: logLine.serverName,
+			text: logLine.index,
+			scope: "row"
+		});
+		var tdTime = $('<td/>', {
+			class: "logTime",
+			text: getDate(logLine.time)
+		});
+		
+		tr.append(tdIndex).append(tdTime).append(tdSentRequest).append(tdReceivedRequest).append(tdSentResponse).append(tdReceivedResponse).append(tdBody);
 		
 		if (currentLogLine) {
 			$( "#" + currentLogLine.id).after(tr);
@@ -388,6 +410,7 @@ function VidyoLog(containerId) {
 			if (leg1_sentRequest) {
 				/* this logLine is sentRequest */
 				tdSentRequest.attr("id",sentRequest);
+				tdSentRequest.html("<a>&#8594;</a>");
 				tdReceivedRequest.html("<a href='#" + receivedRequest + "'>&#8595;</a>");
 				tdSentResponse.html("<a href='#" + sentResponse + "'>&#8595;</a>");
 				tdReceivedResponse.html("<a href='#" + receivedResponse + "'>&#8595;</a>");
@@ -395,6 +418,7 @@ function VidyoLog(containerId) {
 				/* this logLine is receivedRequest */
 				tdSentRequest.html("<a href='#" + sentRequest + "'>&#8593;</a>");
 				tdReceivedRequest.attr("id",receivedRequest);
+				tdReceivedRequest.html("<a>&#8594;</a>");
 				tdSentResponse.html("<a href='#" + sentResponse + "'>&#8595;</a>");
 				tdReceivedResponse.html("<a href='#" + receivedResponse + "'>&#8595;</a>");
 			} else if (leg3_sentResponse) {
@@ -402,6 +426,7 @@ function VidyoLog(containerId) {
 				tdSentRequest.html("<a href='#" + sentRequest + "'>&#8593;</a>");
 				tdReceivedRequest.html("<a href='#" + receivedRequest + "'>&#8593;</a>");
 				tdSentResponse.attr("id",sentResponse);
+				tdSentResponse.html("<a>&#8594;</a>");
 				tdReceivedResponse.html("<a href='#" + receivedResponse + "'>&#8595;</a>");
 			} else if (leg4_receivedResponse) {
 				/* this logLine is SentRequest */
@@ -409,6 +434,7 @@ function VidyoLog(containerId) {
 				tdReceivedRequest.html("<a href='#" + receivedRequest + "'>&#8593;</a>");
 				tdSentResponse.html("<a href='#" + sentResponse + "'>&#8593;</a>");
 				tdReceivedResponse.attr("id",receivedResponse);
+				tdReceivedResponse.html("<a>&#8594;</a>");
 			}
 		}
 		var colorRow = " "

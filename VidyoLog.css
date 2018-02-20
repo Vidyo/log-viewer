@@ -21,6 +21,19 @@ body {
 	right:      0;
 	overflow:   scroll;
 }
+table.logTable {
+	table-layout: fixed;
+}
+th.logIndex {
+	width: 50px;
+}
+td.logTime {
+	width: 80px;
+}
+td.logGoTo {
+	width: 10px;
+}
+
 .inlineBlock {
 	display: inline-block;
 }
