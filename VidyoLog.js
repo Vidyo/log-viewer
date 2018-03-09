@@ -200,6 +200,7 @@ function VidyoLog(containerId) {
           	var logLine = null;
 
 			if (!logLineUnparsed || logLineUnparsed.length == 0) {
+					i++;
                 	return;
 			} else {
 					var logLineFullUnparsed = logFileSplit[i];
