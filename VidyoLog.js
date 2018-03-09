@@ -193,52 +193,52 @@ function VidyoLog(containerId) {
 	}
 	this.ProcessLogFile = function (logFile) {
 		var lineNumber = 1;
-        logFileSplit = logFile.split('\n');
-        var i=0;
-        var lineProcess=function () {
-          	var logLineUnparsed = logFileSplit[i];
-          	var logLine = null;
+		logFileSplit = logFile.split('\n');
+		var i=0;
+		var lineProcess=function () {
+		  	var logLineUnparsed = logFileSplit[i];
+		  	var logLine = null;
 
 			if (!logLineUnparsed || logLineUnparsed.length == 0) {
-					i++;
-                	return;
-			} else {
-					var logLineFullUnparsed = logFileSplit[i];
-					if (logLineUnparsed[2] == '-') {
-						logLine = ParseDesktopLog(logLineFullUnparsed, lineNumber);
-					} else if (logLineUnparsed[0] == '{') {
-						logLine = ParseSplunkLog(logLineFullUnparsed, lineNumber);
-					} else {
-						/* if the next line does not begin with a number, concatenate both lines! */
-						while (logFileSplit[i + 1] && (logFileSplit[i + 1][0] < '0' || logFileSplit[i + 1][0] > '9')) {
-							logLineFullUnparsed = logLineFullUnparsed.concat(logFileSplit[i + 1]);
-								i = i + 1;
-						}
-						logLine = ParseSDKLog(logLineFullUnparsed, lineNumber);
-					}
-				}
-				if (!logLine) {
-					logLine = ParseErrorLog(i);
-				}
-				logLine.levelEncoded = EncodeStringForAttr(logLine.level);
-				logLine.categoryEncoded = EncodeStringForAttr(logLine.category);
-				logLine.functionLineShortEncoded = EncodeStringForAttr(logLine.functionLineShort);
-				logLine.functionNameEncoded = EncodeStringForAttr(logLine.functionName);
-				lineNumber++;
-
-				/* order lines */
-				OrderAndRender(logLine);
-		
-				$("#processing").html("Loading: "+Math.round(i/logFileSplit.length*10000)/100+" %");
 				i++;
-				if(i==logFileSplit.length-1) {
-                	clearInterval(x);
-                	$("#processing").html("Loaded");
-           		} 
-        	};    
-        var x=setInterval(lineProcess,1);
+				return;
+			} else {
+				var logLineFullUnparsed = logFileSplit[i];
+				if (logLineUnparsed[2] == '-') {
+					logLine = ParseDesktopLog(logLineFullUnparsed, lineNumber);
+				} else if (logLineUnparsed[0] == '{') {
+					logLine = ParseSplunkLog(logLineFullUnparsed, lineNumber);
+				} else {
+					/* if the next line does not begin with a number, concatenate both lines! */
+					while (logFileSplit[i + 1] && (logFileSplit[i + 1][0] < '0' || logFileSplit[i + 1][0] > '9')) {
+						logLineFullUnparsed = logLineFullUnparsed.concat(logFileSplit[i + 1]);
+							i = i + 1;
+					}
+					logLine = ParseSDKLog(logLineFullUnparsed, lineNumber);
+				}
+			}
+			if (!logLine) {
+				logLine = ParseErrorLog(i);
+			}
+			logLine.levelEncoded = EncodeStringForAttr(logLine.level);
+			logLine.categoryEncoded = EncodeStringForAttr(logLine.category);
+			logLine.functionLineShortEncoded = EncodeStringForAttr(logLine.functionLineShort);
+			logLine.functionNameEncoded = EncodeStringForAttr(logLine.functionName);
+			lineNumber++;
+
+			/* order lines */
+			OrderAndRender(logLine);
+	
+			$("#processing").html("Loading: "+Math.round(i/logFileSplit.length*10000)/100+" %");
+			i++;
+			if(i==logFileSplit.length-1) {
+				clearInterval(x);
+				$("#processing").html("Loaded");
+			} 
+		};	
+		var x=setInterval(lineProcess,1);
 		/* for (var i = 0; i < logFileSplit.length; i++) {
-        	}*/
+			}*/
 	}
 	
 	this.ScrollToLogRecord = function(logRecord, server) {
@@ -854,16 +854,16 @@ function VidyoStats(containerId) {
 			sendStreamBitRateTotal   += sendStreamStat["sendNetworkBitRate"];
 			sendStreamPixelRateTotal += (sendStreamStat["width"] * sendStreamStat["height"] * sendStreamStat["fpsSent"]);
 			sendStreams[key] = {};
-			sendStreams[key].bitRate     = sendStreamBitRateTotal;
+			sendStreams[key].bitRate	 = sendStreamBitRateTotal;
 			sendStreams[key].bitRateText = sendStreamStat["sendNetworkBitRate"]/1024 + "Kb " +  sendStreamStat["codecName"] + " rtt:" + sendStreamStat["sendNetworkRtt"]/1000000 + "ms" + " N:" + sendStreamStat["codecNacks"] + " I:" + sendStreamStat["codecIFrames"] + " F:" + sendStreamStat["codecFir"];
-			sendStreams[key].pixelRate     = sendStreamPixelRateTotal;
+			sendStreams[key].pixelRate	 = sendStreamPixelRateTotal;
 			sendStreams[key].pixelRateText = deviceStat["width"] + "x" + deviceStat["height"] + "@S:" + 1/deviceStat["frameIntervalSet"] + "/M:" + 1/deviceStat["frameIntervalMeasured"] + sendStreamStat["width"] + "x" + sendStreamStat["height"] + "@E:" + sendStreamStat["fps"] + "/I:" + sendStreamStat["fpsInput"] + "/S:" + sendStreamStat["fpsSent"];
 		}
 		function LocalStreamAudioParse(deviceStat, sendStreamStat, index) {
 			var key = "A:" + deviceStat.name + "_" + index;
 			sendStreamBitRateTotal += sendStreamStat["sendNetworkBitRate"];
 			sendStreams[key] = {};
-			sendStreams[key].bitRate     = sendStreamBitRateTotal;
+			sendStreams[key].bitRate	 = sendStreamBitRateTotal;
 			sendStreams[key].bitRateText = sendStreamStat["sendNetworkBitRate"] + " " + sendStreamStat["codecName"] + ":" + sendStreamStat["sampleRate"] + ":" + sendStreamStat["numberOfChannels"] + " rtt:" + sendStreamStat["sendNetworkRtt"]/1000000 + "ms" + " dtx:" + sendStreamStat["codecDtx"] + " Q:" + sendStreamStat["codecQualitySetting"];
 		}
 				
@@ -872,9 +872,9 @@ function VidyoStats(containerId) {
 			receiveStreamBitRateTotal   += remoteDeviceStat["receiveNetworkBitRate"];
 			receiveStreamPixelRateTotal += (remoteDeviceStat["width"] * remoteDeviceStat["height"] * remoteDeviceStat["fpsDecoderInput"]);
 			receiveStreams[key] = {};
-			receiveStreams[key].bitRate     = receiveStreamBitRateTotal;
-			receiveStreams[key].bitRateText        = remoteDeviceStat["receiveNetworkBitRate"] + " " + remoteDeviceStat["codecName"] + " C:" + remoteDeviceStat["receiveNetworkPacketsConcealed"] + " L:" + remoteDeviceStat["receiveNetworkPacketsLost"] + " O:" + remoteDeviceStat["receiveNetworkPacketsReordered"] + " R:" + remoteDeviceStat["receiveNetworkRecoveredWithFec"] + " N:" + remoteDeviceStat["codecNacks"] + " I:" + remoteDeviceStat["codecIFrames"] + " F:" + remoteDeviceStat["codecFir"];
-			receiveStreams[key].pixelRate     = receiveStreamPixelRateTotal;
+			receiveStreams[key].bitRate	 = receiveStreamBitRateTotal;
+			receiveStreams[key].bitRateText		= remoteDeviceStat["receiveNetworkBitRate"] + " " + remoteDeviceStat["codecName"] + " C:" + remoteDeviceStat["receiveNetworkPacketsConcealed"] + " L:" + remoteDeviceStat["receiveNetworkPacketsLost"] + " O:" + remoteDeviceStat["receiveNetworkPacketsReordered"] + " R:" + remoteDeviceStat["receiveNetworkRecoveredWithFec"] + " N:" + remoteDeviceStat["codecNacks"] + " I:" + remoteDeviceStat["codecIFrames"] + " F:" + remoteDeviceStat["codecFir"];
+			receiveStreams[key].pixelRate	 = receiveStreamPixelRateTotal;
 			receiveStreams[key].pixelRateText = remoteDeviceStat["width"] + "x" + remoteDeviceStat["height"] + "@" + remoteDeviceStat["fpsDecoderInput"] + "/" + remoteDeviceStat["fpsDecoded"] + "/" + remoteDeviceStat["fpsRendered"] + " show:" + remoteDeviceStat["showWidth"] + "x" + remoteDeviceStat["showHeight"] + "@" + remoteDeviceStat["showFrameRate"] + " pixelRate:" + remoteDeviceStat["showPixelRate"];
 		}
 				
@@ -882,7 +882,7 @@ function VidyoStats(containerId) {
 			var key = participantStat.name + " / " + remoteDeviceStat.name + "(" + participantStat.id + " / " + remoteDeviceStat.id + ")";
 			receiveStreamBitRateTotal += remoteDeviceStat["receiveNetworkBitRate"];
 			receiveStreams[key] = {};
-			receiveStreams[key].bitRate    = receiveStreamBitRateTotal;
+			receiveStreams[key].bitRate	= receiveStreamBitRateTotal;
 			receiveStreams[key].bitRateText = remoteDeviceStat["receiveNetworkBitRate"] + " " + remoteDeviceStat["codecName"] + ":" + remoteDeviceStat["sampleRate"] + ":" + remoteDeviceStat["numberOfChannels"] + " rtt:" + remoteDeviceStat["sendNetworkRtt"]/1000000 + "ms" + " dtx:" + remoteDeviceStat["codecDtx"] + " Q:" + remoteDeviceStat["codecQualitySetting"];
 			
 			/* Audio debug for speaker streams */
@@ -890,7 +890,7 @@ function VidyoStats(containerId) {
 				var localSpeakerStreamStat = remoteDeviceStat.localSpeakerStreams[k];
 				var key = participantStat.name + " / " + remoteDeviceStat.name + "(" + localSpeakerStreamStat.name + ")";
 				audioDebug[key] = {};
-				audioDebug[key].delay     = localSpeakerStreamStat["delay"]/1000000; //ms
+				audioDebug[key].delay	 = localSpeakerStreamStat["delay"]/1000000; //ms
 				audioDebug[key].text = "L:" + localSpeakerStreamStat["lowestThreshold"]/1000000 + "ms H:" + localSpeakerStreamStat["highestThreshold"]/1000000 + "ms E:" + localSpeakerStreamStat["lastEnergy"] + " O:" + localSpeakerStreamStat["overrun"]/1000000 + " U:" + localSpeakerStreamStat["underrun"]/1000000 + " P:" + localSpeakerStreamStat["played"]/1000000;
 			}
 		}
@@ -947,23 +947,23 @@ function VidyoStats(containerId) {
 				/* split applicaiton Id */
 				var applicationId = roomStat.id.substring(roomStat.id.lastIndexOf("_") + 1, roomStat.id.lastIndexOf("@"));
 				/* assign fitals from any room */
-				vitals.cpuUsage                        = roomStat.cpuUsage;
-				vitals.userId                          = userStat.id.substring(0, userStat.id.lastIndexOf("_"));
-				vitals.resourceId                      = resourceId;
-				vitals.applicationId                   = applicationId;
-				vitals.reflectorId                     = roomStat.reflectorId;
-				vitals.transportInformation            = roomStat.transportInformation;
-				vitals.latencyInformation              = userStat.latencyTestStats;
-				vitals.maxEncodePixelRate              = roomStat.maxEncodePixelRate;
-				vitals.maxDecodePixelRate              = roomStat.maxDecodePixelRate;
-				vitals.currentCpuEncodePixelRate       = roomStat.currentCpuEncodePixelRate;
+				vitals.cpuUsage						= roomStat.cpuUsage;
+				vitals.userId						  = userStat.id.substring(0, userStat.id.lastIndexOf("_"));
+				vitals.resourceId					  = resourceId;
+				vitals.applicationId				   = applicationId;
+				vitals.reflectorId					 = roomStat.reflectorId;
+				vitals.transportInformation			= roomStat.transportInformation;
+				vitals.latencyInformation			  = userStat.latencyTestStats;
+				vitals.maxEncodePixelRate			  = roomStat.maxEncodePixelRate;
+				vitals.maxDecodePixelRate			  = roomStat.maxDecodePixelRate;
+				vitals.currentCpuEncodePixelRate	   = roomStat.currentCpuEncodePixelRate;
 				vitals.currentBandwidthEncodePixelRate = roomStat.currentBandwidthEncodePixelRate;
-				vitals.currentCpuDecodePixelRate       = roomStat.currentCpuDecodePixelRate;
+				vitals.currentCpuDecodePixelRate	   = roomStat.currentCpuDecodePixelRate;
 				vitals.currentBandwidthDecodePixelRate = roomStat.currentBandwidthDecodePixelRate;
-				vitals.sendBitRateAvailable            = roomStat.sendBitRateAvailable;
-				vitals.sendBitRateTotal                = roomStat.sendBitRateTotal;
-				vitals.receiveBitRateAvailable         = roomStat.receiveBitRateAvailable;
-				vitals.receiveBitRateTotal             = roomStat.receiveBitRateTotal;
+				vitals.sendBitRateAvailable			= roomStat.sendBitRateAvailable;
+				vitals.sendBitRateTotal				= roomStat.sendBitRateTotal;
+				vitals.receiveBitRateAvailable		 = roomStat.receiveBitRateAvailable;
+				vitals.receiveBitRateTotal			 = roomStat.receiveBitRateTotal;
 				
 				for (var i in roomStat.participantStats) {
 					var participantStat = roomStat.participantStats[i];
@@ -1104,10 +1104,10 @@ function VidyoStats(containerId) {
 			var rxDynamicTable = '';
 			rxDynamicTable +=		'<tr>';
 			rxDynamicTable +=			'<td title="Generation">' + generation + '</td>';
-			rxDynamicTable +=			'<td title="Name">'       + participantGenerationStat.name + '</td>';
-			rxDynamicTable +=			'<td title="Camera">'     + participantGenerationStat.cameraName + '</td>';
-			rxDynamicTable +=			'<td title="Show">'      + participantGenerationStat.width + '/' + participantGenerationStat.height + '</td>';
-			rxDynamicTable +=			'<td title="Show">'       + Math.round(nsecPerSec/participantGenerationStat.frameInterval) + '</td>';
+			rxDynamicTable +=			'<td title="Name">'	   + participantGenerationStat.name + '</td>';
+			rxDynamicTable +=			'<td title="Camera">'	 + participantGenerationStat.cameraName + '</td>';
+			rxDynamicTable +=			'<td title="Show">'	  + participantGenerationStat.width + '/' + participantGenerationStat.height + '</td>';
+			rxDynamicTable +=			'<td title="Show">'	   + Math.round(nsecPerSec/participantGenerationStat.frameInterval) + '</td>';
 			rxDynamicTable +=			'<td title="PixelRate">'  + numberWithCommas(participantGenerationStat.pixelRate) + '</td>';
 			rxDynamicTable +=		'</tr>';
 			
@@ -1364,7 +1364,7 @@ function VidyoStats(containerId) {
 			var card = '';
 			card += '<div class="col-sm-3">';
 			card += '	<div class="card" style="width: 6rem;">';
-			card += '    <div class="card-header">' + title + '</div>';
+			card += '	<div class="card-header">' + title + '</div>';
 			card += ' 	 <div class="card-body">';
 			card += '		<h6 class="card-title">' + value + '%</h4>';
 			card += ' 	 </div>';
