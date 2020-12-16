@@ -53,6 +53,44 @@ function VidyoLog(containerId) {
 	this.SetServerSideFilter = function(filter) {
 		logRecordsFilter = filter;
 	}
+	this.GetStatisticByUserID = function(userId) {
+		clearInterval(serversPullingInterval);
+		clearInterval(this.GetStatisticByUserID.interval);
+		if (this.GetStatisticByUserID.request) {
+			this.GetStatisticByUserID.request.abort();
+		}
+		this.SetNewContainer(containerId);
+		var index = 1;
+		var latestTimeStampNanoseconds = 0;
+		function getStatistic () {
+			var self = this;
+			var startTime = latestTimeStampNanoseconds ? '&start=' +  (latestTimeStampNanoseconds + 1000000) : '';
+			self.GetStatisticByUserID.request = $.getJSON('https://emp.alpha.vidyo.com/loki/api/v1/query_range?query={User=%22' + userId + '%22}' + startTime, function (response) {
+				console.log(response);
+				var result = response.data.result[0];
+				if (result) {
+					var records = result.values.reverse().map(function (value) {
+						var statisticJson = value[1];
+						latestTimeStampNanoseconds = latestTimeStampNanoseconds < parseInt(value[0]) ? parseInt(value[0]) : latestTimeStampNanoseconds;
+						return {
+							category: 180,
+							categoryName: "VidyoClient",
+							index: index++,
+							eventTime: parseInt(value[0]),
+							functionName: "VidyoRoomStatisticsAsyncRun",
+							level: "LMI_LOGLEVEL_INFO",
+							threadName: "Execute Async-0",
+							message: statisticJson,
+						}
+					});
+					console.log(records);
+					self.AddLogRecords(records, {});
+				}
+			});
+		}
+		getStatistic.call(this);
+		this.GetStatisticByUserID.interval = setInterval(getStatistic.bind(this), 10000);
+	}
 	this.AddLogRecords = function(logRecords, server) {
 		for (recordId in logRecords) {
 			record = logRecords[recordId];
@@ -591,7 +629,7 @@ function VidyoLog(containerId) {
 	this.SetNewContainer(containerId);
 	
 	var vidyoLog_ = this;
-	setInterval(function () {
+	var serversPullingInterval = setInterval(function () {
 		if (stopPoll == true)
 			return;
 		/* get the log if available on servers */
@@ -604,6 +642,7 @@ function VidyoLog(containerId) {
 					/* user a closure to store data */
 					var requestedServer = server;
 					return function(data) {
+						if (!serversPullingInterval) return;
 					   vidyoLog_.AddLogRecords(data.records, requestedServer);
 					   requestedServer.index = data.nextIndex;
 					};
