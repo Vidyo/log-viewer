@@ -8,6 +8,7 @@ function VidyoLog(containerId) {
 	var searchString = "";
 	var vidyoStats;
 	var stopPoll = false;
+	var isNewLogs= null;
 	
 	this.AddServer = function(serverName, serverHOST) {
 		if (serverHOST && !serverHOST.startsWith("http"))
@@ -129,17 +130,57 @@ function VidyoLog(containerId) {
 		}
 		return logLine;
 	}
+	function checkIfNewLogs(logLine){
+		const newLineRegEx1 = /\.[a-z]{1,3}\:[0-9]{1,7}\s\]$/g // .... .c:xxxxx ] (fileext+colon+numbers+space+closingsqarebracket)
+		const newLineRegEx2 = /\:\s/g // .... :  ] (colon+space)
+		const newLineRegEx3 = /\]$/g // .... ] (line-ending with space+closingsquarebracket)
+		const newLineRegEx4 = /utc/g
+		if(logLine.match(newLineRegEx1) !==null && logLine.match(newLineRegEx2) !== null && logLine.match(newLineRegEx3) !== null){
+			return true;
+		}
+		else if(logLine.match(newLineRegEx3) === null  ) {
+		 	return false;
+		}
+		else{
+		   return null;
+		}
+	}
+	function getNewLogFlags (logLine){
+	 try{
+			const part1 = logLine.split(": ", 3);
+			const [time,level,category] = part1;
+			const splitExp = /\[\s([^)]+)\.[a-z]{1,3}\:[0-9]{1,5}\s\]/g
+			const part2 = logLine.match(splitExp)[0].toString();
+			const [threadName,,functionName,functionLine] = part2.substring(2).substring(0, part2.length-4).toString().split(",");
+			return [time,level,category,threadName,functionLine,functionName];
+		}
+		catch(e){
+			return null;
+		}
+	}
+	function getLogMessageBody(logLine){
+		const startPart = logLine.split(": ", 3);
+		const lastPart = logLine.match(/\[\s([^)]+)\.[a-z]{1,3}\:[0-9]{1,5}\s\]/g);
+		const splittedString1 =  logLine.split(startPart.map((e)=>{return e + ": "}).join(""))[1];
+		return splittedString1.split(lastPart[0].toString())[0];
+
+	}
 	function ParseSDKLog(logLineUnparsed, id) {
-		var logLineTags = logLineUnparsed.split(": ", 6);
+		if(logLineUnparsed.match(/\(UTC+/g) || logLineUnparsed.toString().length < 5){
+			return null;
+		}
+		if(isNewLogs===null){
+		 	isNewLogs = checkIfNewLogs(logLineUnparsed);
+		}
+		var logLineTags = isNewLogs? getNewLogFlags(logLineUnparsed):logLineUnparsed.split(": ", 6);
 		if (!logLineTags || logLineTags.length != 6)
 			return null;
 		var indexOfLastMarker = logLineUnparsed.indexOf(logLineTags[5]) + logLineTags[5].length + 2;
 		var logLine = new Object();
-		
 		var timeParts = logLineTags[0].split(/[\/ -.:]/, 7);
 		logLine.id = "logLine" + id;
 		logLine.time =  new Date(timeParts[0], timeParts[1] - 1, timeParts[2], timeParts[3], timeParts[4], timeParts[5], timeParts[6]);
-		
+
 		/* check for valid header */
 		if(logLine.time.getFullYear()) {			
 			logLine.level = logLineTags[1];
@@ -148,9 +189,14 @@ function VidyoLog(containerId) {
 			logLine.functionLine = logLineTags[4];
 			logLine.functionLineShort = logLine.functionLine.split("/").pop().replace(":", "-").replace(".", "_");
 			logLine.functionName = logLineTags[5];
-			logLine.body = logLineUnparsed.slice(indexOfLastMarker);	
+			if(!isNewLogs){
+				logLine.body = logLineUnparsed.slice(indexOfLastMarker);	
+			}
+			else{
+				logLine.body =  getLogMessageBody(logLineUnparsed)
+			}
 			logLine.index = id;
-		} else {		
+		} else {
 			return null;
 		}
 		return logLine;
@@ -439,13 +485,13 @@ function VidyoLog(containerId) {
 			}
 		}
 		var colorRow = " "
-		if (logLine.level == "WARNING") {
+		if (logLine.level == "WARNING" ||logLine.level == "WRN" ) {
 			colorRow = "table-warning ";
-		} else if (logLine.level == "ERROR") {
+		} else if (logLine.level == "ERROR" || logLine.level == "ERR") {
 			colorRow = "table-danger ";
-		} else if (logLine.level == "SENT") {
+		} else if (logLine.level == "SENT" || logLine.level == "SNT") {
 			colorRow = "table-success ";
-		} else if (logLine.level == "RECEIVED") {
+		} else if (logLine.level == "RECEIVED" || logLine.level == "RCV") {
 			colorRow = "table-info ";
 		}
 		var tr = $('<tr/>', {
