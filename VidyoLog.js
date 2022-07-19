@@ -1188,17 +1188,32 @@ function VidyoStats(containerId) {
 		txVideoTableBody = $('<tbody></tbody>');
 		
 		var found = false;
-		for (var i in stats.localCameraStats) {
-			var deviceStat = stats.localCameraStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteRendererStreams) {
-				var sendStreamStat = deviceStat.remoteRendererStreams[j];
-				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoTableBody);
-				txVideoBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
+		const WriteDataInTable_Video = (dataKey,filter) => { 
+			let dataObject = filter?stats[dataKey].filter(item=>{
+				return item.id.includes(filter)
+			}) : stats[dataKey];
+
+			for (var i in dataObject) {
+				var deviceStat = dataObject[i];
+				/* iterate through all the remote streams */
+				for (var j in deviceStat.remoteRendererStreams) {
+					var sendStreamStat = deviceStat.remoteRendererStreams[j];
+					/* find stream if already exists */
+					LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoTableBody);
+					txVideoBitRate += sendStreamStat["sendNetworkBitRate"];
+				}
 			}
 		}
+		if(stats.localCameraStats.length>0){
+			WriteDataInTable_Video('localCameraStats');
+			found=true;
+		}
+		
+		if(stats.virtualVideoSourceStats.length>0){
+			WriteDataInTable_Video('virtualVideoSourceStats','Virtual_Camera');
+			found=true;
+		}
+
 		if (!found) {
 			txVideoTableBody +=	  '<tr>';
 			txVideoTableBody +=		'<th title="None" colspan="9">None</th>';
@@ -1226,28 +1241,35 @@ function VidyoStats(containerId) {
 		txContentTable = $(txContentTable);
 		txContentTableBody = $('<tbody></tbody>');
 		var found = false;
-		for (var i in stats.localWindowShareStats) {
-			var deviceStat = stats.localWindowShareStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteRendererStreams) {
-				var sendStreamStat = deviceStat.remoteRendererStreams[j];
-				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTableBody);
-				txContentBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
+
+		const WriteDataInTable_Content = (dataKey,filter) => { 
+			let dataObject = filter?stats[dataKey].filter(item=>{
+				return item.id.includes(filter)
+			}) : stats[dataKey];
+			for (var i in dataObject) {
+				var deviceStat = dataObject[i];
+				/* iterate through all the remote streams */
+				for (var j in deviceStat.remoteRendererStreams) {
+					var sendStreamStat = deviceStat.remoteRendererStreams[j];
+					/* find stream if already exists */
+					LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTableBody);
+					txContentBitRate += sendStreamStat["sendNetworkBitRate"];
+				}
 			}
 		}
-		/* monitors */
-		for (var i in stats.localMonitorStats) {
-			var deviceStat = stats.localMonitorStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteRendererStreams) {
-				var sendStreamStat = deviceStat.remoteRendererStreams[j];
-				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTableBody);
-				txContentBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
-			}
+		if(stats.localWindowShareStats.length>0){
+			WriteDataInTable_Content('localWindowShareStats');
+			found=true;
+		}
+
+		if(stats.localMonitorStats.length>0){
+			WriteDataInTable_Content('localMonitorStats');
+			found=true;
+		}
+
+		if(stats.virtualVideoSourceStats.length>0){
+			WriteDataInTable_Content('virtualVideoSourceStats', 'Virtual_Share');
+			found=true;
 		}
 		if (!found) {
 			txContentTableBody +=	  '<tr>';
@@ -1276,17 +1298,31 @@ function VidyoStats(containerId) {
 		txAudioTable = $(txAudioTable);
 		txAudioTableBody = $('<tbody></tbody>');
 		var found = false;
-		for (var i in stats.localMicrophoneStats) {
-			var deviceStat = stats.localMicrophoneStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteSpeakerStreams) {
-				var sendStreamStat = deviceStat.remoteSpeakerStreams[j];
-				/* find stream if already exists */
-				LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioTableBody);
-				txAudioBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
+		const WriteDataInTable_Audio = (dataKey,filter) => { 
+			let dataObject = filter?stats[dataKey].filter(item=>{
+				return item.id.includes(filter)
+			}) : stats[dataKey];
+			for (var i in dataObject) {
+				var deviceStat = dataObject[i];
+				/* iterate through all the remote streams */
+				for (var j in deviceStat.remoteSpeakerStreams) {
+					var sendStreamStat = deviceStat.remoteSpeakerStreams[j];
+					/* find stream if already exists */
+					LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioTableBody);
+					txAudioBitRate += sendStreamStat["sendNetworkBitRate"];
+				}
 			}
 		}
+
+		if(stats.localMicrophoneStats.length>0){
+			WriteDataInTable_Audio('localMicrophoneStats');
+			found=true;
+		}
+		if(stats.virtualAudioSourceStats.length>0){
+			WriteDataInTable_Audio('virtualAudioSourceStats');
+			found=true;
+		}
+
 		if (!found) {
 			txAudioTableBody +=	  '<tr>';
 			txAudioTableBody +=		'<th title="None" colspan="9">None</th>';
