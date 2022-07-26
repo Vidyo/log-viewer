@@ -1064,7 +1064,9 @@ function VidyoStats(containerId) {
 			sendStreamBitRateTotal   += sendStreamStat["sendNetworkBitRate"];
 			sendStreamPixelRateTotal += (sendStreamStat["width"] * sendStreamStat["height"] * sendStreamStat["fpsSent"]);
 			var rttWarning = convertToMs(sendStreamStat["sendNetworkRtt"]) > 150 ? "text-warning" : "";
-			
+			const layers = deviceStat.remoteRendererStreams.map(item=>{
+				return item.codecLayers
+			})
 			var txVideoSourcesTable = '';
 			txVideoSourcesTable +=		'<tr>';
 			txVideoSourcesTable +=			'<td title="Name">' + deviceStat.name + '</td>';
@@ -1075,6 +1077,7 @@ function VidyoStats(containerId) {
 			txVideoSourcesTable +=			'<td title="FIR/NACK/IFrame">' + sendStreamStat["codecFir"] + '/' + sendStreamStat["codecNacks"] + '/' + sendStreamStat["codecIFrames"] + '</td>';
 			txVideoSourcesTable +=			'<td title="RTT" class="' + rttWarning + '">' + convertToMs(sendStreamStat["sendNetworkRtt"]) + 'ms</td>';
 			txVideoSourcesTable +=			'<td title="Bitrate">' + numberWithCommas(sendStreamStat["sendNetworkBitRate"]) + '</td>';
+			txVideoSourcesTable +=			'<td title="Codec Layers">'+layers.join("<br/>")+'</td>';
 			txVideoSourcesTable +=		'</tr>';
 			
 			txVideoSourcesTableObj.append(txVideoSourcesTable);
@@ -1102,7 +1105,9 @@ function VidyoStats(containerId) {
 		function RemoteStreamVideoParse(remoteDeviceStat, participantStat, rxVideoSinkTableObj) {
 			receiveStreamBitRateTotal   += remoteDeviceStat["receiveNetworkBitRate"];
 			receiveStreamPixelRateTotal += (remoteDeviceStat["width"] * remoteDeviceStat["height"] * remoteDeviceStat["fpsDecoderInput"]);
-
+			const layers = remoteDeviceStat["localRendererStreams"].map(item=>{
+				return item.activeSpatialLayers + '/' + item.maxSpatialLayers
+			})
 			var rxVideoSinkTable = '';
 			rxVideoSinkTable +=		'<tr>';
 			rxVideoSinkTable +=			'<td title="Name">' + remoteDeviceStat.name + '</td>';
@@ -1115,11 +1120,12 @@ function VidyoStats(containerId) {
 			rxVideoSinkTable +=			'<td title="FIR/NACK/IFRAME">' + remoteDeviceStat["codecFir"] + '/' + remoteDeviceStat["codecNacks"] + '/' + remoteDeviceStat["codecIFrames"] + '</td>';
 			rxVideoSinkTable +=			'<td title="Lost/Concealed/Reordered">' + remoteDeviceStat["receiveNetworkPacketsLost"] + '/' + remoteDeviceStat["receiveNetworkPacketsConcealed"] + '/' + remoteDeviceStat["receiveNetworkPacketsReordered"] + '</td>';
 			rxVideoSinkTable +=			'<td title="Bitrate">' + numberWithCommas(remoteDeviceStat["receiveNetworkBitRate"]) + '</td>';
+			rxVideoSinkTable +=			`<td title="Active Spatial /  Max Spatial">${layers.join('<br/>')}</td>`;
 			rxVideoSinkTable +=		'</tr>';
 			
 			rxVideoSinkTableObj.append(rxVideoSinkTable);	
 		}
-				
+
 		function RemoteStreamAudioParse(remoteDeviceStat, participantStat, rxAudioSinkTableObj) {
 			receiveStreamBitRateTotal += remoteDeviceStat["receiveNetworkBitRate"];
 			
@@ -1174,6 +1180,7 @@ function VidyoStats(containerId) {
 		txVideoTable +=			'<th scope="col" title="FIR/NACK/IFrame">FIR</th>';
 		txVideoTable +=			'<th scope="col" title="RTT">RTT</th>';
 		txVideoTable +=			'<th scope="col" title="Bitrate">Bitrate</th>';
+		txVideoTable +=			'<th scope="col" title="Codec Layers">Layers</th>';
 		txVideoTable +=		'</tr>';
 		txVideoTable +=	  '</thead>';
 		txVideoTable += '</table>';
@@ -1181,17 +1188,32 @@ function VidyoStats(containerId) {
 		txVideoTableBody = $('<tbody></tbody>');
 		
 		var found = false;
-		for (var i in stats.localCameraStats) {
-			var deviceStat = stats.localCameraStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteRendererStreams) {
-				var sendStreamStat = deviceStat.remoteRendererStreams[j];
-				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoTableBody);
-				txVideoBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
+		const WriteDataInTable_Video = (dataKey,filter) => { 
+			let dataObject = filter?stats[dataKey].filter(item=>{
+				return item.id.includes(filter)
+			}) : stats[dataKey];
+
+			for (var i in dataObject) {
+				var deviceStat = dataObject[i];
+				/* iterate through all the remote streams */
+				for (var j in deviceStat.remoteRendererStreams) {
+					var sendStreamStat = deviceStat.remoteRendererStreams[j];
+					/* find stream if already exists */
+					LocalStreamVideoParse(deviceStat, sendStreamStat, txVideoTableBody);
+					txVideoBitRate += sendStreamStat["sendNetworkBitRate"];
+				}
 			}
 		}
+		if(stats.localCameraStats.length>0){
+			WriteDataInTable_Video('localCameraStats');
+			found=true;
+		}
+		
+		if(stats.virtualVideoSourceStats.length>0){
+			WriteDataInTable_Video('virtualVideoSourceStats','Virtual_Camera');
+			found=true;
+		}
+
 		if (!found) {
 			txVideoTableBody +=	  '<tr>';
 			txVideoTableBody +=		'<th title="None" colspan="9">None</th>';
@@ -1212,34 +1234,42 @@ function VidyoStats(containerId) {
 		txContentTable +=		'<th title="FIR/NACK/IFrame">FIR</th>';
 		txContentTable +=		'<th title="RTT">RTT</th>';
 		txContentTable +=		'<th title="Bitrate">Bitrate</th>';
+		txContentTable +=		'<th scope="col" title="Codec Layers">Layers</th>';
 		txContentTable +=	  '</tr>';
 		txContentTable +=   '</thead>';
 		txContentTable += '</table>';
 		txContentTable = $(txContentTable);
 		txContentTableBody = $('<tbody></tbody>');
 		var found = false;
-		for (var i in stats.localWindowShareStats) {
-			var deviceStat = stats.localWindowShareStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteRendererStreams) {
-				var sendStreamStat = deviceStat.remoteRendererStreams[j];
-				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTableBody);
-				txContentBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
+
+		const WriteDataInTable_Content = (dataKey,filter) => { 
+			let dataObject = filter?stats[dataKey].filter(item=>{
+				return item.id.includes(filter)
+			}) : stats[dataKey];
+			for (var i in dataObject) {
+				var deviceStat = dataObject[i];
+				/* iterate through all the remote streams */
+				for (var j in deviceStat.remoteRendererStreams) {
+					var sendStreamStat = deviceStat.remoteRendererStreams[j];
+					/* find stream if already exists */
+					LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTableBody);
+					txContentBitRate += sendStreamStat["sendNetworkBitRate"];
+				}
 			}
 		}
-		/* monitors */
-		for (var i in stats.localMonitorStats) {
-			var deviceStat = stats.localMonitorStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteRendererStreams) {
-				var sendStreamStat = deviceStat.remoteRendererStreams[j];
-				/* find stream if already exists */
-				LocalStreamVideoParse(deviceStat, sendStreamStat, txContentTableBody);
-				txContentBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
-			}
+		if(stats.localWindowShareStats.length>0){
+			WriteDataInTable_Content('localWindowShareStats');
+			found=true;
+		}
+
+		if(stats.localMonitorStats.length>0){
+			WriteDataInTable_Content('localMonitorStats');
+			found=true;
+		}
+
+		if(stats.virtualVideoSourceStats.length>0){
+			WriteDataInTable_Content('virtualVideoSourceStats', 'Virtual_Share');
+			found=true;
 		}
 		if (!found) {
 			txContentTableBody +=	  '<tr>';
@@ -1268,17 +1298,31 @@ function VidyoStats(containerId) {
 		txAudioTable = $(txAudioTable);
 		txAudioTableBody = $('<tbody></tbody>');
 		var found = false;
-		for (var i in stats.localMicrophoneStats) {
-			var deviceStat = stats.localMicrophoneStats[i];
-			/* iterate through all the remote streams */
-			for (var j in deviceStat.remoteSpeakerStreams) {
-				var sendStreamStat = deviceStat.remoteSpeakerStreams[j];
-				/* find stream if already exists */
-				LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioTableBody);
-				txAudioBitRate += sendStreamStat["sendNetworkBitRate"];
-				found = true;
+		const WriteDataInTable_Audio = (dataKey,filter) => { 
+			let dataObject = filter?stats[dataKey].filter(item=>{
+				return item.id.includes(filter)
+			}) : stats[dataKey];
+			for (var i in dataObject) {
+				var deviceStat = dataObject[i];
+				/* iterate through all the remote streams */
+				for (var j in deviceStat.remoteSpeakerStreams) {
+					var sendStreamStat = deviceStat.remoteSpeakerStreams[j];
+					/* find stream if already exists */
+					LocalStreamAudioParse(deviceStat, sendStreamStat, txAudioTableBody);
+					txAudioBitRate += sendStreamStat["sendNetworkBitRate"];
+				}
 			}
 		}
+
+		if(stats.localMicrophoneStats.length>0){
+			WriteDataInTable_Audio('localMicrophoneStats');
+			found=true;
+		}
+		if(stats.virtualAudioSourceStats.length>0){
+			WriteDataInTable_Audio('virtualAudioSourceStats');
+			found=true;
+		}
+
 		if (!found) {
 			txAudioTableBody +=	  '<tr>';
 			txAudioTableBody +=		'<th title="None" colspan="9">None</th>';
@@ -1311,6 +1355,7 @@ function VidyoStats(containerId) {
 		rxVideoTable +=			'<th title="FIR/NACK/IFRAME">FIR</th>';
 		rxVideoTable +=			'<th title="Lost/Concealed/Reordered">Packets</th>';
 		rxVideoTable +=			'<th title="Bitrate">Bitrate</th>';
+		rxVideoTable +=			'<th title="Active Spatial / Max Spatial">Layers</th>';
 		rxVideoTable +=		'</tr>';
 		rxVideoTable +=   '</thead>';
 		rxVideoTable += '</table>';
@@ -1331,6 +1376,7 @@ function VidyoStats(containerId) {
 		rxContentTable +=			'<th title="FIR/NACK/IFRAME">FIR</th>';
 		rxContentTable +=			'<th title="Lost/Concealed/Reordered">Packets</th>';
 		rxContentTable +=			'<th title="Bitrate">Bitrate</th>';
+		rxContentTable +=			'<th title="Active Spatial / Max Spatial">Layers</th>';
 		rxContentTable +=		'</tr>';
 		rxContentTable +=   '</thead>';
 		rxContentTable += '</table>';
@@ -1427,8 +1473,6 @@ function VidyoStats(containerId) {
 		var cpuDecodePct =  Math.round((Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100);
 		
 		/* fixme the library produces 0 for bandwith when resource manager is not activated. remove when library is fixed */
-		bandwidthEncodePct = bandwidthEncodePct == 0 ? 100 : bandwidthEncodePct;
-		bandwidthDecodePct = bandwidthDecodePct == 0 ? 100 : bandwidthDecodePct;
 		
 		/* available  table */		
 		availableTable += '<table class="stats table table-sm table-striped">';
