@@ -145,6 +145,7 @@ function VidyoLog(containerId) {
 		   return null;
 		}
 	}
+	
 	function getNewLogFlags (logLine){
 	 try{
 			const part1 = logLine.split(": ", 3);
@@ -158,13 +159,14 @@ function VidyoLog(containerId) {
 			return null;
 		}
 	}
+
 	function getLogMessageBody(logLine){
 		const startPart = logLine.split(": ", 3);
 		const lastPart = logLine.match(/\[\s([^)]+)\.[a-z]{1,3}\:[0-9]{1,5}\s\]/g);
 		const splittedString1 =  logLine.split(startPart.map((e)=>{return e + ": "}).join(""))[1];
 		return splittedString1.split(lastPart[0].toString())[0];
-
 	}
+
 	function ParseSDKLog(logLineUnparsed, id) {
 		if(logLineUnparsed.match(/\(UTC+/g) || logLineUnparsed.toString().length < 5){
 			return null;
@@ -771,7 +773,6 @@ function VidyoStats(containerId) {
 		return myChart;
 	}
 		/* 
-	
 			labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
 			datasets: [{
 				label: '# of Votes',
@@ -851,16 +852,19 @@ function VidyoStats(containerId) {
 			var stats = $.parseJSON(logLine.body);
 			stats.logLineId = logLine.id;
 			return this.ProcessStatsObject(stats);
+
 		} else if (logLine.functionName == "UsageTrackerLog") {
 			/* Server Log */
 			var stats = $.parseJSON(logLine.body);
 			stats.stats.logLineId = logLine.id;
 			return this.ProcessStatsObject(stats.stats);
+
 		} else if (logLine.functionName == "SplunkLog") {
 			/* Splunk Log */
 			var stats = $.parseJSON(logLine.body);
 			stats.stats.logLineId = logLine.id;
 			return this.ProcessStatsObject(stats.stats);
+
 		}
 		return null;
 	}
@@ -1915,11 +1919,7 @@ function VidyoStats(containerId) {
 		var bandwidthDecodePct = (Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100;
 		var cpuEncodePct = (Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100;
 		var cpuDecodePct = (Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100;
-		/* fixme the library produces 0 for bandwith when resource manager is not activated. remove when library is fixed */
-		bandwidthEncodePct = bandwidthEncodePct == 0 ? 100 : bandwidthEncodePct;
-		bandwidthDecodePct = bandwidthDecodePct == 0 ? 100 : bandwidthDecodePct;
 		var pctMin = Math.min(Math.min(Math.min(bandwidthEncodePct, bandwidthDecodePct), cpuEncodePct), cpuDecodePct);
-		
 		if (!isNaN(pctMin)) {
 			addData(timelineChart, vitals.timeStampDateFormat, pctMin, vitals.timeStamp);
 		}
