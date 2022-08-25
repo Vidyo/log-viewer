@@ -1471,10 +1471,10 @@ function VidyoStats(containerId) {
 		cardsTable += addResourceCard("CPU", vitals.cpuUsage);
 		*/
 				
-		var bandwidthEncodePct = Math.round((Math.min(vitals["currentBandwidthEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100);
-		var bandwidthDecodePct =  Math.round((Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100);
-		var cpuEncodePct =  Math.round((Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100);
-		var cpuDecodePct =  Math.round((Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100);
+		var bandwidthEncodePct = Math.round((Math.min(vitals["currentBandwidthEncodePixelRate"], vitals["maxEncodePixelRate"]) / vitals["maxEncodePixelRate"])*100);
+		var bandwidthDecodePct =  Math.round((Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"]) / vitals["maxDecodePixelRate"])*100);
+		var cpuEncodePct =  Math.round((Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"]) * 100 / vitals["maxEncodePixelRate"]));
+		var cpuDecodePct =  Math.round((Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"]) * 100 / vitals["maxDecodePixelRate"]));
 		
 		/* fixme the library produces 0 for bandwith when resource manager is not activated. remove when library is fixed */
 		
@@ -1915,11 +1915,11 @@ function VidyoStats(containerId) {
 	}
 	
 	function Render(vitals, sendStreams, receiveStreams, audioDebugStreams)  {
-		var bandwidthEncodePct = (Math.min(vitals["currentBandwidthEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100;
-		var bandwidthDecodePct = (Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100;
-		var cpuEncodePct = (Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"])/vitals["maxEncodePixelRate"])*100;
-		var cpuDecodePct = (Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"])/vitals["maxDecodePixelRate"])*100;
-		var pctMin = Math.min(Math.min(Math.min(bandwidthEncodePct, bandwidthDecodePct), cpuEncodePct), cpuDecodePct);
+		var bandwidthEncodePct = Math.round((Math.min(vitals["currentBandwidthEncodePixelRate"], vitals["maxEncodePixelRate"]) / vitals["maxEncodePixelRate"])*100);
+		var bandwidthDecodePct =  Math.round((Math.min(vitals["currentBandwidthDecodePixelRate"], vitals["maxDecodePixelRate"]) / vitals["maxDecodePixelRate"])*100);
+		var cpuEncodePct =  Math.round((Math.min(vitals["currentCpuEncodePixelRate"], vitals["maxEncodePixelRate"]) * 100 / vitals["maxEncodePixelRate"]));
+		var cpuDecodePct =  Math.round((Math.min(vitals["currentCpuDecodePixelRate"], vitals["maxDecodePixelRate"]) * 100 / vitals["maxDecodePixelRate"]));
+		var pctMin = Math.min(Math.min(bandwidthEncodePct, bandwidthDecodePct), (cpuEncodePct > 0 && cpuDecodePct > 0 ? 100 : 0));
 		if (!isNaN(pctMin)) {
 			addData(timelineChart, vitals.timeStampDateFormat, pctMin, vitals.timeStamp);
 		}
