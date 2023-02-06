@@ -153,7 +153,7 @@ function VidyoLog(containerId) {
 			const splitExp = /\[\s([^)]+)\.[a-z]{1,3}\:[0-9]{1,5}\s\]/g
 			const part2 = logLine.match(splitExp)[0].toString();
 			const [threadName,,functionName,functionLine] = part2.substring(2).substring(0, part2.length-4).toString().split(",");
-			return [time,level,category,threadName,functionLine,functionName];
+			return [time,level,category,threadName,functionLine,functionName.trim()];
 		}
 		catch(e){
 			return null;
