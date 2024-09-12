@@ -50,6 +50,14 @@ function VidyoLogViewer() {
 				vidyoLog.Search($("#searchLogInput").val());
 				return false;
 			});
+			$("#statByUserId").click(function(e){
+				var userId = $("#userIdInput").val();
+				if (userId) {
+					GetStatisticByUserID(userId);
+					$("#userIdInput").val('');
+					$('#lokiNavbarDropdownMenuLink').dropdown('toggle');
+				}
+			});
 		}
 		
 		function AddServer(serverName, serverHOST) {
@@ -66,6 +74,10 @@ function VidyoLogViewer() {
 			});
 			vidyoLog.AddServer(serverName, serverHOST);
 			serverId++;
+		}
+		function GetStatisticByUserID (userId) {
+			if (!userId) return;
+			vidyoLog.GetStatisticByUserID(userId);
 		}
 		InitialLayout(containerDivId);
 		AddServer("localhost:7776", "localhost:7776");
@@ -115,6 +127,19 @@ $(document).ready(function()
 			  </a>
 			</div>
 		  </li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="lokiNavbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Loki Server
+				</a>
+				<div class="dropdown-menu" id="lokiServer" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="#">
+						<form class="form-inline inlineBlock">
+							<input class="form-control mr-sm-2" type="search" placeholder="Statistic by user id" aria-label="Upload" id="userIdInput">
+							<button class="btn btn-success my-2 my-sm-0" type="submit" id="statByUserId">Get</button>
+						</form>
+					</a>
+				</div>
+			</li>
 		</ul>
 	  </div>
 	  <form class="form-inline">
