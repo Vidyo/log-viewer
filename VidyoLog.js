@@ -1169,6 +1169,20 @@ function VidyoStats(containerId) {
 			
 			rxDynamicTableObj.append(rxDynamicTable);	
 		}
+
+		function SelectedParse(selectedParticipantsStat, rxSelectedTableObj, index) {
+			var rxSelectedTable = '';
+			rxSelectedTable +=  '<tr>';
+			rxSelectedTable +=  '<td title="Participant">' + index + '</td>';
+			rxSelectedTable +=  '<td title="Name">'   + selectedParticipantsStat.name + '</td>';
+			rxSelectedTable +=  '<td title="Camera">'  + selectedParticipantsStat.cameraName + '</td>';
+			rxSelectedTable +=  '<td title="Show">'  + selectedParticipantsStat.width + '/' + selectedParticipantsStat.height + '</td>';
+			rxSelectedTable +=  '<td title="Show">'   + Math.round(nsecPerSec/selectedParticipantsStat.frameInterval) + '</td>';
+			rxSelectedTable +=  '<td title="PixelRate">'  + numberWithCommas(selectedParticipantsStat.pixelRate) + '</td>';
+			rxSelectedTable +=  '</tr>';
+						
+			rxSelectedTableObj.append(rxSelectedTable);
+		}
 		
 		/* Sending streams */
 		/* cameras */
@@ -1426,6 +1440,23 @@ function VidyoStats(containerId) {
 		rxDynamicTable = $(rxDynamicTable);
 		rxDynamicTableBody = $('<tbody></tbody>');
 		rxDynamicTable.append(rxDynamicTableBody);
+
+		var rxSelectedTable = '';
+		rxSelectedTable += '<table class="stats table table-sm table-striped">';
+		rxSelectedTable +=   '<thead class="thead-dark">';
+		rxSelectedTable +=  '<tr>';
+		rxSelectedTable +=  '<th title="SelectedParticipants">SelectedParticipants</th>';
+		rxSelectedTable +=  '<th title="Name">Name</th>';
+		rxSelectedTable +=  '<th title="Camera">Camera</th>';
+		rxSelectedTable +=  '<th title="Show">Resolution</th>';
+		rxSelectedTable +=  '<th title="Show">FPS</th>';
+		rxSelectedTable +=  '<th title="Pixelrate">Pixelrate</th>';
+		rxSelectedTable +=  '</tr>';
+		rxSelectedTable +=   '</thead>';
+		rxSelectedTable += '</table>';
+		rxSelectedTable = $(rxSelectedTable);
+		rxSelectedTableBody = $('<tbody></tbody>');
+		rxSelectedTable.append(rxSelectedTableBody);
 		
 				
 		signalingLatencyTable += '<table class="stats table table-sm table-striped">';
@@ -1617,6 +1648,10 @@ function VidyoStats(containerId) {
 				for (var i in roomStat.participantGenerationStats) {
 					var participantGenerationStat = roomStat.participantGenerationStats[i];
 					GenerationParse(participantGenerationStat, rxDynamicTableBody, i);
+				}
+				for (var i in roomStat.selectedParticipantsStats) {
+					var selectedParticipantsStat = roomStat.selectedParticipantsStats[i];
+					SelectedParse(selectedParticipantsStat, rxSelectedTableBody, i);
 				}
 						
 				txBandwidthTable += '<table class="stats table table-sm table-striped">';
@@ -1898,6 +1933,7 @@ function VidyoStats(containerId) {
 			.append(rxVideoTable)
 			.append(rxContentTable)
 			.append(rxAudioTable)
+			.append(rxSelectedTable)
 			.append(rxDynamicTable));
 		
 		/* 2 columns for advanced for and logs */
